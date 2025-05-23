@@ -4,7 +4,7 @@ from common.logger import get_logger
 import json
 
 from common.types.client_messages import FileTransferMessage
-from common.types.server_messages import ServerError, ServerAck, LookupResponse, Message
+from common.types.server_messages import ServerError, ServerAck, LookupResponse, ChatMessage
 from common.types.topic import Topic
 
 logger = get_logger("Server:ClientService")
@@ -74,12 +74,7 @@ class ClientService:
             )
 
         else:
-            client.publish(f"{Topic.MESSAGE.value}/{to_user}",
-                        Message(
-                            message=message
-                        ).model_dump_json()
-            )
-
+            client.publish(f"{Topic.MESSAGE.value}/{to_user}", ChatMessage(message=message).model_dump_json())
             client.publish(f"{Topic.SEND_MSG.value}/{from_user}",
                            ServerAck(
                                topic=f"{Topic.SEND_MSG.value}/{from_user}",
@@ -111,11 +106,12 @@ class ClientService:
             )
 
             client.publish(f"{Topic.MESSAGE.value}/{data.to_user}",
-                           Message(
+                           ChatMessage(
                                message=data.message,
                                content_base64=data.content_base64
                            ).model_dump_json()
             )
+
             logger.info("Message from %s to %s sent", data.from_user, data.to_user)
 
     def lookup(self, requester: str, target: str, client: Client) -> None:

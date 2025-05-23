@@ -10,7 +10,7 @@ class LookupResponse(ServerResponse):
     target: str
     address: str
 
-class Message(ServerResponse):
+class ChatMessage(ServerResponse):
     message: str
     content_base64: Optional[str] = ""
 
