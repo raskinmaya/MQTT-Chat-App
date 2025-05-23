@@ -26,7 +26,7 @@ class ClientService:
                 client.publish(f"{Topic.MESSAGE.value}/{username}", json.dumps(message))
             del self.offline_messages[username]
 
-    def route_message(self, from_user: str, to_user: str, message: dict[str, Any], client: Client) -> None:
+    def send_message(self, from_user: str, to_user: str, message: dict[str, Any], client: Client) -> None:
         if to_user not in self.clients:
             client.publish(f"{Topic.SEND_MSG.value}/{from_user}", json.dumps({"error": f"User {to_user} not found, message not sent"}))
             return
@@ -38,7 +38,7 @@ class ClientService:
 
         logger.info("Message from %s to %s routed", message['from_user'], to_user)
 
-    def handle_lookup(self, requester: str, target: str, client: Client) -> None:
+    def lookup(self, requester: str, target: str, client: Client) -> None:
         address = self.clients_online.get(target, "")
 
         if not address:

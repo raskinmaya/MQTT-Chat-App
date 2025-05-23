@@ -10,15 +10,15 @@ client_service = ClientService()
 
 @topic(Topic.REGISTER.value)
 @schema(RegisterMessage)
-def handle_register(data: RegisterMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
+def register(data: RegisterMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
     client_service.register(data.username, data.address, client)
 
 @topic(Topic.SEND_MSG.value)
 @schema(ChatMessage)
-def handle_send(data: ChatMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
-    client_service.route_message(data.from_user, data.to_user, data.model_dump(), client)
+def send_message(data: ChatMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
+    client_service.send_message(data.from_user, data.to_user, data.model_dump(), client)
 
 @topic(Topic.LOOKUP.value)
 @schema(LookupMessage)
-def handle_lookup(data: LookupMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
-    client_service.handle_lookup(data.requester, data.target, client)
+def lookup(data: LookupMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
+    client_service.lookup(data.requester, data.target, client)
