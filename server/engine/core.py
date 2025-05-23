@@ -9,10 +9,9 @@ handlers: dict[str, Callable[[list[str], MQTTMessage, Client], None]] = {}
 
 def on_connect(client: Client, userdata: Any, flags: dict[str, Any], rc: int) -> None:
     logger.info("Connected to MQTT broker with result code %s", str(rc))
-    client.subscribe(f"{Topics.REGISTER.value}/#")
-    client.subscribe(f"{Topics.SEND_MESSAGE.value}/#")
-    client.subscribe(f"{Topics.SEND_FILE.value}/#")
-    client.subscribe(f"{Topics.LOOKUP.value}/#")
+
+    for t in Topics:
+        client.subscribe(f"{t.value}/#")
 
 def on_message(client: Client, userdata: Any, msg: MQTTMessage) -> None:
     topic_parts = msg.topic.split('/')

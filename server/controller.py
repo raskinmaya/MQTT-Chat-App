@@ -19,7 +19,7 @@ def handle_register(parts: list[str], msg: MQTTMessage, client: Client) -> None:
         client_service.register(data.username, data.address, client)
     except ValidationError as e:
         logger.error(f"Register validation error: {e}")
-        client.publish(f"{Topics.ERROR.value}/{Topics.REGISTER.value}", json.dumps({"error": str(e)}))
+        client.publish(Topics.REGISTER.value, json.dumps({"error": str(e)}))
 
 @topic_handler(Topics.SEND_MESSAGE.value)
 def handle_send(parts: list[str], msg: MQTTMessage, client: Client) -> None:
@@ -29,7 +29,7 @@ def handle_send(parts: list[str], msg: MQTTMessage, client: Client) -> None:
     # TODO: Add user not found error
     except ValidationError as e:
         logger.error(f"Send validation error: {e}")
-        client.publish(f"{Topics.ERROR.value}/{Topics.SEND_MESSAGE.value}", json.dumps({"error": str(e)}))
+        client.publish(Topics.SEND_MESSAGE.value, json.dumps({"error": str(e)}))
 
 @topic_handler(Topics.LOOKUP.value)
 def handle_lookup(parts: list[str], msg: MQTTMessage, client: Client) -> None:
@@ -38,4 +38,4 @@ def handle_lookup(parts: list[str], msg: MQTTMessage, client: Client) -> None:
         client_service.handle_lookup(data.requester, data.target, client)
     except ValidationError as e:
         logger.error(f"Lookup validation error: {e}")
-        client.publish(f"{Topics.ERROR.value}/{Topics.LOOKUP.value}", json.dumps({"error": str(e)}))
+        client.publish(Topics.LOOKUP.value, json.dumps({"error": str(e)}))

@@ -6,4 +6,3 @@ class Topics(Enum):
     SEND_MESSAGE = "send_message"
     SEND_FILE = "send_file"
     LOOKUP = "lookup"
-    ERROR = "error"
