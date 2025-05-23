@@ -1,16 +1,18 @@
 from typing import Any, Callable
 from paho.mqtt.client import Client, MQTTMessage
 from common.logger import get_logger
-from common.config import MQTT_BROKER, MQTT_PORT, CA_CERT, CLIENT_CERT, CLIENT_KEY
+from common.config import MQTT_BROKER, MQTT_PORT
+from common.topics import Topics
 
 logger = get_logger("Server:Core")
 handlers: dict[str, Callable[[list[str], MQTTMessage, Client], None]] = {}
 
 def on_connect(client: Client, userdata: Any, flags: dict[str, Any], rc: int) -> None:
     logger.info("Connected to MQTT broker with result code %s", str(rc))
-    client.subscribe("register/#")
-    client.subscribe("send/#")
-    client.subscribe("lookup/#")
+    client.subscribe(f"{Topics.REGISTER.value}/#")
+    client.subscribe(f"{Topics.SEND_MESSAGE.value}/#")
+    client.subscribe(f"{Topics.SEND_FILE.value}/#")
+    client.subscribe(f"{Topics.LOOKUP.value}/#")
 
 def on_message(client: Client, userdata: Any, msg: MQTTMessage) -> None:
     topic_parts = msg.topic.split('/')
@@ -26,7 +28,6 @@ def run_server():
     client: Client = Client()
     client.on_connect = on_connect
     client.on_message = on_message
-    # client.tls_set(ca_certs=CA_CERT, certfile=CLIENT_CERT, keyfile=CLIENT_KEY)
     client.connect(MQTT_BROKER, MQTT_PORT)
     logger.info("Server connected to broker %s:%s", MQTT_BROKER, MQTT_PORT)
     client.loop_forever()

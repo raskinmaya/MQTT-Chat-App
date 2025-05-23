@@ -1,6 +1,5 @@
 from cryptography.fernet import Fernet
 
-# This should be securely shared between clients
 FERNET_KEY = Fernet.generate_key()
 cipher = Fernet(FERNET_KEY)
 
