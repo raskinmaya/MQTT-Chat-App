@@ -4,8 +4,8 @@ from paho.mqtt.client import Client, MQTTMessage
 from pydantic import ValidationError
 
 from common.logger import get_logger
-from common.messages import RegisterMessage, ChatMessage, LookupMessage
-from common.topic import Topic
+from common.types.requests import RegisterMessage, ChatMessage, LookupMessage
+from common.types.topic import Topic
 from server.engine.utils import topic_handler
 from server.service import ClientService
 
@@ -21,15 +21,14 @@ def handle_register(parts: list[str], msg: MQTTMessage, client: Client) -> None:
         logger.error(f"Register validation error: {e}")
         client.publish(Topic.REGISTER.value, json.dumps({"error": str(e)}))
 
-@topic_handler(Topic.SEND_MESSAGE.value)
+@topic_handler(Topic.MESSAGE.value)
 def handle_send(parts: list[str], msg: MQTTMessage, client: Client) -> None:
     try:
         data = ChatMessage.model_validate_json(msg.payload)
         client_service.route_message(data.to_user, data.model_dump(), client)
-    # TODO: Add user not found error
     except ValidationError as e:
         logger.error(f"Send validation error: {e}")
-        client.publish(Topic.SEND_MESSAGE.value, json.dumps({"error": str(e)}))
+        client.publish(Topic.MESSAGE.value, json.dumps({"error": str(e)}))
 
 @topic_handler(Topic.LOOKUP.value)
 def handle_lookup(parts: list[str], msg: MQTTMessage, client: Client) -> None:

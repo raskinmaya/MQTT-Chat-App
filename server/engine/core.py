@@ -1,8 +1,8 @@
 from typing import Any, Callable
 from paho.mqtt.client import Client, MQTTMessage
 from common.logger import get_logger
-from common.config.config import MQTT_BROKER, MQTT_PORT
-from common.topic import Topic
+from common.config import MQTT_BROKER, MQTT_PORT
+from common.types.topic import Topic
 
 logger = get_logger("Server:Core")
 handlers: dict[str, Callable[[list[str], MQTTMessage, Client], None]] = {}
