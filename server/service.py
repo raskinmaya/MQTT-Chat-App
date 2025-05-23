@@ -3,7 +3,7 @@ from paho.mqtt.client import Client
 from common.logger import get_logger
 import json
 
-logger = get_logger("ClientService")
+logger = get_logger("Server:ClientService")
 
 class ClientService:
     def __init__(self):

@@ -8,8 +8,8 @@ from common.messages import RegisterMessage, ChatMessage, LookupMessage
 from server.engine.utils import topic_handler
 from server.service import ClientService
 
-client_service = ClientService()
 logger = get_logger("Server:Controller")
+client_service = ClientService()
 
 @topic_handler("register")
 def handle_register(parts: list[str], msg: MQTTMessage, client: Client) -> None:
