@@ -14,7 +14,19 @@ class ClientService:
         self.clients_online: dict[str, str] = {}
 
     def register(self, username: str, address: str, client: Client) -> None:
-        if username in self.clients_online:
+        if not username or not address:
+            client.publish(
+                f"{Topic.REGISTER.value}/{address}",
+                ServerError(
+                    topic=f"{Topic.REGISTER.value}/{address}",
+                    username=username,
+                    address=address,
+                    message="Registration could not be completed",
+                    reason="Username or address is empty"
+                ).model_dump_json()
+            )
+
+        elif username in self.clients_online:
             client.publish(
                 f"{Topic.REGISTER.value}/{address}",
                 ServerError(
@@ -39,7 +51,19 @@ class ClientService:
             )
 
     def disconnect(self, username: str, address: str, client: Client) -> None:
-        if username in self.clients_online and self.clients_online[username] == address:
+        if not username or not address:
+            client.publish(
+                f"{Topic.DISCONNECT.value}/{address}",
+                ServerError(
+                    topic=f"{Topic.DISCONNECT.value}/{address}",
+                    username=username,
+                    address=address,
+                    message="Disconnect failed",
+                    reason="Username or address is empty"
+                ).model_dump_json()
+            )
+
+        elif username in self.clients_online and self.clients_online[username] == address:
             client.publish(
                 f"{Topic.DISCONNECT.value}/{address}",
                 ServerAck(
@@ -63,7 +87,17 @@ class ClientService:
             )
 
     def send_message(self, from_user: str, to_user: str, message: str, client: Client) -> None:
-        if to_user not in self.clients_online:
+        if not from_user or not to_user or not message:
+            client.publish(f"{Topic.SEND_MSG.value}/{from_user}",
+                           ServerError(
+                               topic=f"{Topic.SEND_MSG.value}/{from_user}",
+                               username=from_user,
+                               message="Message was not sent",
+                               reason="from_user or to_user or message is empty"
+                           ).model_dump_json()
+            )
+
+        elif to_user not in self.clients_online:
             client.publish(f"{Topic.SEND_MSG.value}/{from_user}",
                            ServerError(
                                topic=f"{Topic.SEND_MSG.value}/{from_user}",
@@ -86,7 +120,18 @@ class ClientService:
             logger.info("Message from %s to %s sent", from_user, to_user)
 
     def send_file(self, data: FileTransferMessage, client: Client) -> None:
-        if data.to_user not in self.clients_online:
+        if not data.to_user or not data.from_user or not data.content_base64:
+            client.publish(
+                f"{Topic.SEND_FILE.value}/{data.from_user}",
+                ServerError(
+                    topic=f"{Topic.SEND_FILE.value}/{data.from_user}",
+                    username=data.from_user,
+                    message="Message was not sent",
+                    reason="from_user or to_user or content_base64 is empty"
+                ).model_dump_json()
+            )
+
+        elif data.to_user not in self.clients_online:
             client.publish(f"{Topic.SEND_FILE.value}/{data.from_user}",
                            ServerError(
                                topic=f"{Topic.SEND_FILE.value}/{data.from_user}",
@@ -110,7 +155,7 @@ class ClientService:
                                message=data.message,
                                content_base64=data.content_base64
                            ).model_dump_json()
-                           )
+            )
 
             logger.info("Message from %s to %s sent", data.from_user, data.to_user)
 
