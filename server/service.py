@@ -14,7 +14,7 @@ class ClientService:
 
     def register(self, username: str, address: str, client: Client) -> None:
         if username in self.clients:
-            client.publish(f"{Topic.REGISTER}/{address}", f"Username {username} is taken")
+            client.publish(f"{Topic.REGISTER.value}/{address}", f"Username {username} is taken")
             return
 
         self.clients.add(username)

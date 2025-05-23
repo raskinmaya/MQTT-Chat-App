@@ -5,14 +5,14 @@ from pydantic import BaseModel, ValidationError
 from server.controller import logger
 from server.engine.core import handlers
 
-def topic_handler(topic: str) -> Callable:
+def topic(topic_name: str) -> Callable:
     def decorator(func: Callable[[list[str], MQTTMessage, Client], None]) -> Callable:
-        handlers[topic] = func
+        handlers[topic_name] = func
         return func
 
     return decorator
 
-def with_validation(model: Type[BaseModel]):
+def schema(model: Type[BaseModel]):
     def decorator(func: Callable[[BaseModel, list[str], Client], None]):
         def wrapper(parts: list[str], msg: MQTTMessage, client: Client):
             try:
