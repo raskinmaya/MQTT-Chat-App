@@ -1,9 +1,6 @@
-import json
-
 from paho.mqtt.client import Client, MQTTMessage
 from common.logger import get_logger
 from common.types.client_messages import RegisterMessage, ChatMessage, LookupMessage
-from common.types.exceptions import UsernameTaken, UserNotFound
 from common.types.topic import Topic
 from server.engine.utils import topic_handler, with_validation
 from server.service import ClientService

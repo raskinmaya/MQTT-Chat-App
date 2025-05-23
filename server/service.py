@@ -1,11 +1,7 @@
 from typing import Any
 from paho.mqtt.client import Client
-from pydantic import ValidationError
-
 from common.logger import get_logger
 import json
-
-from common.types.exceptions import UsernameTaken, UserNotFound
 from common.types.topic import Topic
 
 logger = get_logger("Server:ClientService")
