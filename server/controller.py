@@ -16,7 +16,7 @@ def register(data: RegisterMessage, parts: list[str], msg: MQTTMessage, client: 
 @topic(Topic.SEND_MSG.value)
 @schema(ChatMessage)
 def send_message(data: ChatMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
-    client_service.send_message(data.from_user, data.to_user, data.model_dump(), client)
+    client_service.send_message(data.from_user, data.to_user, data.message, client)
 
 @topic(Topic.LOOKUP.value)
 @schema(LookupMessage)
