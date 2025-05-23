@@ -1,8 +1,8 @@
 from typing import Any, Callable
 from paho.mqtt.client import Client, MQTTMessage
 from common.logger import get_logger
-from common.config import MQTT_BROKER, MQTT_PORT
-from common.topics import Topics
+from common.config.config import MQTT_BROKER, MQTT_PORT
+from common.topic import Topic
 
 logger = get_logger("Server:Core")
 handlers: dict[str, Callable[[list[str], MQTTMessage, Client], None]] = {}
@@ -10,7 +10,7 @@ handlers: dict[str, Callable[[list[str], MQTTMessage, Client], None]] = {}
 def on_connect(client: Client, userdata: Any, flags: dict[str, Any], rc: int) -> None:
     logger.info("Connected to MQTT broker with result code %s", str(rc))
 
-    for t in Topics:
+    for t in Topic:
         client.subscribe(f"{t.value}/#")
 
 def on_message(client: Client, userdata: Any, msg: MQTTMessage) -> None:
