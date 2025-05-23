@@ -1,7 +1,7 @@
 from typing import Callable, Optional
 from paho.mqtt.client import Client, MQTTMessage
 from common.logger import get_logger
-from common.types.requests import ChatMessage, LookupMessage, RegisterMessage
+from common.types.client_messages import ChatMessage, LookupMessage, RegisterMessage
 from common.types.topic import Topic
 
 logger = get_logger("ClientController")

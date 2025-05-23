@@ -5,3 +5,5 @@ class Topic(Enum):
     MESSAGE = "msg"
     FILE = "msg/file"
     LOOKUP = "lookup"
+    SEND_MSG = "send/msg"
+    SEND_FILE = "send/file"

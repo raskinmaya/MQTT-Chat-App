@@ -5,7 +5,7 @@ from pydantic import ValidationError
 from common.logger import get_logger
 import json
 
-from common.types.exceptions import UsernameAlreadyTaken, UserNotFound
+from common.types.exceptions import UsernameTaken, UserNotFound
 from common.types.topic import Topic
 
 logger = get_logger("Server:ClientService")
@@ -17,9 +17,9 @@ class ClientService:
         self.offline_messages: dict[str, list[dict[str, Any]]] = {}
 
     def register(self, username: str, address: str, client: Client) -> None:
-        # TODO Add error handling
         if username in self.clients:
-            raise UsernameAlreadyTaken(username)
+            client.publish(f"{Topic.REGISTER}/{address}", f"Username {username} is taken")
+            return
 
         self.clients.add(username)
         self.clients_online[username] = address
@@ -30,22 +30,23 @@ class ClientService:
                 client.publish(f"{Topic.MESSAGE.value}/{username}", json.dumps(message))
             del self.offline_messages[username]
 
-    def route_message(self, to_user: str, message: dict[str, Any], client: Client) -> None:
-        # TODO Add error handling
+    def route_message(self, from_user: str, to_user: str, message: dict[str, Any], client: Client) -> None:
         if to_user not in self.clients:
-            raise UserNotFound(to_user)
+            client.publish(f"{Topic.SEND_MSG.value}/{from_user}", json.dumps({"error": f"User {to_user} not found, message not sent"}))
+            return
 
         if to_user in self.clients_online:
             client.publish(f"{Topic.MESSAGE.value}/{to_user}", json.dumps(message))
         else:
             self.offline_messages.setdefault(to_user, []).append(message)
+
         logger.info("Message from %s to %s routed", message['from_user'], to_user)
 
     def handle_lookup(self, requester: str, target: str, client: Client) -> None:
         address = self.clients_online.get(target, "")
 
         if not address:
-            client.publish(f"{Topic.LOOKUP.value}/{requester}", "Couldn't find address")
+            client.publish(f"{Topic.LOOKUP.value}/{requester}", "Address not found")
         else:
             client.publish(f"{Topic.LOOKUP.value}/{requester}", address)
         logger.info("Lookup from %s to %s -> %s", requester, target, address)
