@@ -2,8 +2,8 @@ from enum import Enum
 
 class Topic(Enum):
     REGISTER = "register"
+    DISCONNECT = "disconnect"
     MESSAGE = "msg"
-    FILE = "msg/file"
     LOOKUP = "lookup"
     SEND_MSG = "send/msg"
     SEND_FILE = "send/file"
