@@ -16,7 +16,7 @@ def on_connect(client: Client, userdata: Any, flags: dict[str, Any], rc: int) ->
     client.subscribe("lookup/#")
 
 def on_message(client: Client, userdata: Any, msg: MQTTMessage) -> None:
-    topic_parts = msg.topic.split('/')
+    topic_parts: list[str] = msg.topic.split('/')
     try:
         if topic_parts[0] == "register":
             username = topic_parts[1]
@@ -48,7 +48,7 @@ def on_message(client: Client, userdata: Any, msg: MQTTMessage) -> None:
 
 
 def run_server():
-    client = Client()
+    client: Client = Client()
     client.on_connect = on_connect
     client.on_message = on_message
     # client.tls_set(ca_certs=CA_CERT, certfile=CLIENT_CERT, keyfile=CLIENT_KEY)
