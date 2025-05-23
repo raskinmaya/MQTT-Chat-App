@@ -3,7 +3,7 @@ from paho.mqtt.client import Client
 from common.logger import get_logger
 import json
 
-from common.types.client_messages import FileTransferMessage
+from common.types.client_messages import SendFileMessage
 from common.types.server_messages import ServerError, ServerAck, LookupResponse, ChatMessage
 from common.types.topic import Topic
 
@@ -119,7 +119,7 @@ class ClientService:
 
             logger.info("Message from %s to %s sent", from_user, to_user)
 
-    def send_file(self, data: FileTransferMessage, client: Client) -> None:
+    def send_file(self, data: SendFileMessage, client: Client) -> None:
         if not data.to_user or not data.from_user or not data.content_base64:
             client.publish(
                 f"{Topic.SEND_FILE.value}/{data.from_user}",

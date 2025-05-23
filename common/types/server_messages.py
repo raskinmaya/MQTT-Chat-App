@@ -3,18 +3,18 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-class ServerResponse(BaseModel):
+class ServerMessage(BaseModel):
     timestamp: Optional[int] = time.time()
 
-class LookupResponse(ServerResponse):
+class LookupResponse(ServerMessage):
     target: str
     address: str
 
-class ChatMessage(ServerResponse):
+class ChatMessage(ServerMessage):
     message: str
     content_base64: Optional[str] = ""
 
-class ServerAck(ServerResponse):
+class ServerAck(ServerMessage):
     topic: str
     username: str
     address: Optional[str] = ""

@@ -1,7 +1,7 @@
 from paho.mqtt.client import Client, MQTTMessage
 from common.logger import get_logger
-from common.types.client_messages import RegisterMessage, ChatMessage, LookupMessage, DisconnectMessage, \
-    FileTransferMessage
+from common.types.client_messages import RegisterMessage, SendTextMessage, LookupMessage, DisconnectMessage, \
+    SendFileMessage
 from common.types.topic import Topic
 from server.engine.utils import topic, schema
 from server.service import ClientService
@@ -20,13 +20,13 @@ def disconnect(data: DisconnectMessage, parts: list[str], msg: MQTTMessage, clie
     client_service.disconnect(data.username, data.address, client)
 
 @topic(Topic.SEND_FILE.value)
-@schema(FileTransferMessage)
-def handle_send_file(data: FileTransferMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
+@schema(SendFileMessage)
+def handle_send_file(data: SendFileMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
     client_service.send_file(data, client)
 
 @topic(Topic.SEND_MSG.value)
-@schema(ChatMessage)
-def send_message(data: ChatMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
+@schema(SendTextMessage)
+def send_message(data: SendTextMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
     client_service.send_message(data.from_user, data.to_user, data.message, client)
 
 @topic(Topic.LOOKUP.value)

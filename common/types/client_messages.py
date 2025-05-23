@@ -1,28 +1,31 @@
+import time
 from typing import Optional
+from pydantic import BaseModel, Field
 
-from pydantic import BaseModel
+class ClientMessage(BaseModel):
+    timestamp: Optional[int] = time.time()
 
-class RegisterMessage(BaseModel):
-    username: str
-    address: str
+class RegisterMessage(ClientMessage):
+    username: str = Field(...)
+    address: str = Field(...)
 
-class ChatMessage(BaseModel):
-    from_user: str
-    to_user: str
-    message: str
+class DisconnectMessage(ClientMessage):
+    username: str = Field(...)
+    address: str = Field(...)
+
+class SendTextMessage(ClientMessage):
+    from_user: str = Field(...)
+    to_user: str = Field(...)
+    message: str = Field(...)
     timestamp: str
 
-class LookupMessage(BaseModel):
-    requester: str
-    target: str
-
-class DisconnectMessage(BaseModel):
-    username: str
-    address: str
-
-class FileTransferMessage(BaseModel):
-    from_user: str
-    to_user: str
-    filename: str
-    content_base64: str
+class SendFileMessage(ClientMessage):
+    from_user: str = Field(...)
+    to_user: str = Field(...)
+    filename: str = Field(...)
+    content_base64: str = Field(...)
     message: Optional[str] = ""
+
+class LookupMessage(ClientMessage):
+    requester: str = Field(...)
+    target: str = Field(...)

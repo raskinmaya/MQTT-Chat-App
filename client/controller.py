@@ -1,7 +1,7 @@
 from typing import Callable, Optional
 from paho.mqtt.client import Client, MQTTMessage
 from common.logger import get_logger
-from common.types.client_messages import ChatMessage, LookupMessage, RegisterMessage
+from common.types.client_messages import SendTextMessage, LookupMessage, RegisterMessage
 from common.types.topic import Topic
 
 logger = get_logger("ClientController")
@@ -30,7 +30,7 @@ class ClientController:
     def send_message(self, to_user: str, message: str, timestamp: str) -> None:
         self.client.publish(
             Topic.MSG.value,
-            ChatMessage(from_user=self.username, to_user=to_user, message=message, timestamp=timestamp).model_dump_json()
+            SendTextMessage(from_user=self.username, to_user=to_user, message=message, timestamp=timestamp).model_dump_json()
         )
 
         logger.info(f"Sent message to {to_user}")
