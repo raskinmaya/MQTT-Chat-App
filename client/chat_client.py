@@ -20,7 +20,7 @@ class ChatClient:
 
     def on_connect(self, client: Client, userdata: Any, flags: dict, rc: int) -> None:
         logger.info(f"Connected to MQTT broker with result code {rc}")
-        client.subscribe(f"{Topic.MESSAGE.value}/{self.username}")
+        client.subscribe(f"{Topic.MSG.value}/{self.username}")
         client.subscribe(f"{Topic.LOOKUP.value}/{self.username}")
         self.controller.register()
 

@@ -29,7 +29,7 @@ class ClientController:
 
     def send_message(self, to_user: str, message: str, timestamp: str) -> None:
         self.client.publish(
-            Topic.MESSAGE.value,
+            Topic.MSG.value,
             ChatMessage(from_user=self.username, to_user=to_user, message=message, timestamp=timestamp).model_dump_json()
         )
 

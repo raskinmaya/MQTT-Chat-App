@@ -74,7 +74,7 @@ class ClientService:
             )
 
         else:
-            client.publish(f"{Topic.MESSAGE.value}/{to_user}", ChatMessage(message=message).model_dump_json())
+            client.publish(f"{Topic.MSG.value}/{to_user}", ChatMessage(message=message).model_dump_json())
             client.publish(f"{Topic.SEND_MSG.value}/{from_user}",
                            ServerAck(
                                topic=f"{Topic.SEND_MSG.value}/{from_user}",
@@ -105,12 +105,12 @@ class ClientService:
                            ).model_dump_json()
             )
 
-            client.publish(f"{Topic.MESSAGE.value}/{data.to_user}",
+            client.publish(f"{Topic.MSG.value}/{data.to_user}",
                            ChatMessage(
                                message=data.message,
                                content_base64=data.content_base64
                            ).model_dump_json()
-            )
+                           )
 
             logger.info("Message from %s to %s sent", data.from_user, data.to_user)
 
