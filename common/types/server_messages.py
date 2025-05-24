@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class ServerMessage(BaseModel):
     request_id: str
-    timestamp: Optional[int] = time.time()
+    timestamp: Optional[float] = time.time()
 
 class LookupResponse(ServerMessage):
     target: str

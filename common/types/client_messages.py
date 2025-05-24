@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 class ClientMessage(BaseModel):
     request_id: Optional[str] = str(uuid4())
-    timestamp: Optional[int] = time.time()
+    timestamp: Optional[float] = time.time()
 
 class RegisterMessage(ClientMessage):
     username: str = Field(...)

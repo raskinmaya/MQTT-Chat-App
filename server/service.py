@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from paho.mqtt.client import Client
 from common.logger import get_logger
 from common.types.server_messages import ServerError, ServerAck, LookupResponse, ChatMessage
@@ -164,7 +166,7 @@ class ServerService:
 
             client.publish(f"{Topic.MSG.value}/{to_user}",
                            ChatMessage(
-                               request_id=request_id,
+                               request_id=str(uuid4()),
                                filename=filename,
                                message=message,
                                content_base64=content_base64

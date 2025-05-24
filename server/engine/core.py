@@ -3,9 +3,10 @@ from paho.mqtt.client import Client, MQTTMessage
 from common.logger import get_logger
 from common.config import MQTT_BROKER, MQTT_PORT
 from common.types.topic import Topic
-from server.controller import router
+from server.controller import router, ServerController
 
 logger = get_logger("Server:Core")
+server_controller = ServerController()
 
 def on_connect(client: Client, userdata: Any, flags: dict[str, Any], rc: int) -> None:
     logger.info("Connected to MQTT broker with result code %s", str(rc))
@@ -16,8 +17,9 @@ def on_connect(client: Client, userdata: Any, flags: dict[str, Any], rc: int) ->
 def on_message(client: Client, userdata: Any, msg: MQTTMessage) -> None:
     topic_parts = msg.topic.split('/')
     try:
-        if topic_parts[0] in router.handlers:
-            router.handlers[topic_parts[0]](topic_parts, msg, client)
+        handler = router.get(topic_parts[0])
+        if handler:
+            handler(server_controller, msg, client)
         else:
             logger.warning("Unhandled topic: %s", msg.topic)
     except Exception as e:

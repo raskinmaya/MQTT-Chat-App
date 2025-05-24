@@ -1,3 +1,5 @@
+from typing import Callable
+
 from paho.mqtt.client import Client, MQTTMessage
 from common.logger import get_logger
 from common.types.client_messages import RegisterMessage, SendTextMessage, LookupMessage, DisconnectMessage, \
@@ -15,8 +17,10 @@ class ServerController:
         self.logger = get_logger("Server:Controller")
 
     @router.topic(Topic.REGISTER.value)
-    @schema(RegisterMessage)
-    def register(self, data: RegisterMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
+    # @schema(RegisterMessage)
+    def register(self, msg: MQTTMessage, client: Client) -> None:
+        data = RegisterMessage.model_validate_json(msg.payload)
+
         self.server_service.register(
             request_id=data.request_id,
             username=data.username,
@@ -25,8 +29,10 @@ class ServerController:
         )
 
     @router.topic(Topic.DISCONNECT.value)
-    @schema(DisconnectMessage)
-    def disconnect(self, data: DisconnectMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
+    # @schema(DisconnectMessage)
+    def disconnect(self, msg: MQTTMessage, client: Client) -> None:
+        data = DisconnectMessage.model_validate_json(msg.payload)
+
         self.server_service.disconnect(
             request_id=data.request_id,
             username=data.username,
@@ -35,8 +41,10 @@ class ServerController:
         )
 
     @router.topic(Topic.SEND_FILE.value)
-    @schema(SendFileMessage)
-    def handle_send_file(self, data: SendFileMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
+    # @schema(SendFileMessage)
+    def handle_send_file(self, msg: MQTTMessage, client: Client) -> None:
+        data = SendFileMessage.model_validate_json(msg.payload)
+
         self.server_service.send_file(
             request_id=data.request_id,
             from_user=data.from_user,
@@ -48,8 +56,10 @@ class ServerController:
         )
 
     @router.topic(Topic.SEND_MSG.value)
-    @schema(SendTextMessage)
-    def send_message(self, data: SendTextMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
+    # @schema(SendTextMessage)
+    def send_message(self, msg: MQTTMessage, client: Client) -> None:
+        data = SendTextMessage.model_validate_json(msg.payload)
+
         self.server_service.send_message(
             request_id=data.request_id,
             from_user=data.from_user,
@@ -59,13 +69,13 @@ class ServerController:
         )
 
     @router.topic(Topic.LOOKUP.value)
-    @schema(LookupMessage)
-    def lookup(self, data: LookupMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
+    # @schema(LookupMessage)
+    def lookup(self, msg: MQTTMessage, client: Client) -> None:
+        data = LookupMessage.model_validate_json(msg.payload)
+
         self.server_service.lookup(
             request_id=data.request_id,
             requester=data.requester,
             target=data.target,
             client=client
         )
-
-server_controller = ServerController()
