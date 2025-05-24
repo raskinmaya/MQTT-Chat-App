@@ -2,7 +2,8 @@ import json
 from typing import Callable, Type
 from paho.mqtt.client import MQTTMessage, Client
 from pydantic import BaseModel, ValidationError
-from server.controller import logger
+
+from common.logger import get_logger
 from server.engine.core import handlers
 
 def topic(topic_name: str) -> Callable:
@@ -19,7 +20,7 @@ def schema(model: Type[BaseModel]):
                 data = model.model_validate_json(msg.payload)
                 func(data, parts, client)
             except ValidationError as e:
-                logger.error("Request validation error: %s", str(e))
+                get_logger("SchemaValidation").error("Request validation error: %s", str(e))
                 client.publish("error/validation", json.dumps({"error": e.errors()}))
         return wrapper
     return decorator

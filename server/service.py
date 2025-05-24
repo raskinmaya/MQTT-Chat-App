@@ -43,7 +43,7 @@ class ServerService:
                                topic=f"{Topic.REGISTER.value}/{address}",
                                username=username,
                                address=address,
-                               message=f"Registration completed for user {username}"
+                               message=f"Registration completed for user {username}, address {address}"
                            ).model_dump_json()
             )
 

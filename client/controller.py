@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Callable
 
 from paho.mqtt.client import Client, MQTTMessage
 from client.service import ClientService
@@ -9,13 +9,6 @@ class ClientController:
     def __init__(self, mqtt_client: Client):
         self.client_service = ClientService(mqtt_client)
         self.logger = get_logger("Client:Controller")
-
-    def handle_incoming_message(self, client: Client, userdata, msg: MQTTMessage) -> None:
-        topic_parts = msg.topic.split('/')
-        try:
-            raise NotImplementedError
-        except Exception as e:
-            self.logger.error(f"Error handling incoming message on {msg.topic}: {e}")
 
     def register(self, username: str, address: str) -> None:
         self.client_service.register(username, address)

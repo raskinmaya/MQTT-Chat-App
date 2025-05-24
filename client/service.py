@@ -1,7 +1,8 @@
-from typing import Optional
+from typing import Optional, Any
 
-from paho.mqtt.client import Client
+from paho.mqtt.client import Client, MQTTMessage
 
+from common.config import MQTT_BROKER, MQTT_PORT
 from common.logger import get_logger
 from common.types.client_messages import LookupMessage, SendTextMessage, RegisterMessage, SendFileMessage, \
     DisconnectMessage
@@ -21,12 +22,10 @@ class ClientService:
 
         self.logger.info(f"Attempting register client {username} with address {address}")
 
-        # on register ack:
-        #
-        # logger.info(f"Connected to MQTT broker with result code {rc}")
-        # client.subscribe(f"{Topic.MSG.value}/{self.username}")
-        # client.subscribe(f"{Topic.LOOKUP.value}/{self.username}")
-
+    def on_registration_complete(self, username: str) -> None:
+        self.logger.info(f"Connecting client {username} to broker {MQTT_BROKER}:{MQTT_PORT}")
+        self.client.connect(MQTT_BROKER, MQTT_PORT)
+        self.client.loop_start()
 
     def disconnect(self, username: str, address: str) -> None:
         self.client.publish(
@@ -36,11 +35,10 @@ class ClientService:
 
         self.logger.info(f"Attempting disconnect for user {username}")
 
-        # on disconnect ack:
-        #
-        # self.client.loop_stop()
-        # self.client.disconnect()
-        # logger.info(f"Disconnected client {self.username}")
+    def on_disconnect_complete(self, username: str):
+        self.client.loop_stop()
+        self.client.disconnect()
+        self.logger.info(f"Disconnected user {username}")
 
     def send_message(self, from_user: str, to_user: str, message: str) -> None:
         self.client.publish(
