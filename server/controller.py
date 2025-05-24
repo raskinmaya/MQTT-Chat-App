@@ -4,7 +4,7 @@ from common.types.client_messages import RegisterMessage, SendTextMessage, Looku
     SendFileMessage
 from common.types.topic import Topic
 from common.types.topic_router import TopicRouter
-from server.engine.utils import schema
+from common.types.with_validation import schema
 from server.service import ServerService
 
 router = TopicRouter()
@@ -17,26 +17,55 @@ class ServerController:
     @router.topic(Topic.REGISTER.value)
     @schema(RegisterMessage)
     def register(self, data: RegisterMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
-        self.server_service.register(data.username, data.address, client)
+        self.server_service.register(
+            request_id=data.request_id,
+            username=data.username,
+            address=data.address,
+            client=client
+        )
 
     @router.topic(Topic.DISCONNECT.value)
     @schema(DisconnectMessage)
     def disconnect(self, data: DisconnectMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
-        self.server_service.disconnect(data.username, data.address, client)
+        self.server_service.disconnect(
+            request_id=data.request_id,
+            username=data.username,
+            address=data.address,
+            client=client
+        )
 
     @router.topic(Topic.SEND_FILE.value)
     @schema(SendFileMessage)
     def handle_send_file(self, data: SendFileMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
-        self.server_service.send_file(data, client)
+        self.server_service.send_file(
+            request_id=data.request_id,
+            from_user=data.from_user,
+            to_user=data.to_user,
+            filename=data.filename,
+            content_base64=data.content_base64,
+            message=data.message,
+            client=client
+        )
 
     @router.topic(Topic.SEND_MSG.value)
     @schema(SendTextMessage)
     def send_message(self, data: SendTextMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
-        self.server_service.send_message(data.from_user, data.to_user, data.message, client)
+        self.server_service.send_message(
+            request_id=data.request_id,
+            from_user=data.from_user,
+            to_user=data.to_user,
+            message=data.message,
+            client=client
+        )
 
     @router.topic(Topic.LOOKUP.value)
     @schema(LookupMessage)
     def lookup(self, data: LookupMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
-        self.server_service.lookup(data.requester, data.target, client)
+        self.server_service.lookup(
+            request_id=data.request_id,
+            requester=data.requester,
+            target=data.target,
+            client=client
+        )
 
 server_controller = ServerController()

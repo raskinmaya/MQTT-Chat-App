@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 class ServerMessage(BaseModel):
+    request_id: str
     timestamp: Optional[int] = time.time()
 
 class LookupResponse(ServerMessage):
@@ -13,6 +14,7 @@ class LookupResponse(ServerMessage):
 class ChatMessage(ServerMessage):
     message: str
     content_base64: Optional[str] = ""
+    filename: Optional[str] = ""
 
 class ServerAck(ServerMessage):
     topic: str
