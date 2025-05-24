@@ -1,50 +1,27 @@
-import json
 from functools import wraps
-from typing import Callable, Type
-from paho.mqtt.client import MQTTMessage, Client
-from pydantic import BaseModel, ValidationError
+from paho.mqtt.client import MQTTMessage
+from typing import Type, Callable
 
-from common.logger import get_logger
-
+from pydantic import BaseModel
 
 
-from functools import wraps
-from pydantic import ValidationError
-import json
-
-
-def schema(model: Type[BaseModel]) -> Callable:
+def schema(message_cls: Type[BaseModel]):
     """
-    A decorator to validate `msg.payload` against the given Pydantic model schema and inject parsed data into the function arguments.
-
-    :param model: A Pydantic model class to validate against.
-    :return: Decorated function.
+    Decorator to transform 'msg.payload' into a validated model instance (data)
+    and pass it as an argument to the original function.
     """
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: Callable):
         @wraps(func)
-        def wrapper(*args, **kwargs):
-            # Extract `msg` from args or kwargs
-            msg = kwargs.get('msg', None)
-            if not msg and len(args) > 0:
-                msg = args[-2]  # Assuming `msg` is always the last positional argument.
-
-            if not msg.payload:
-                raise ValueError(f"'msg' must have a 'payload' attribute.")
-
+        def wrapper(self, msg: MQTTMessage, client, *args, **kwargs):
+            # Validate and parse the MQTTMessage payload using the provided schema
             try:
-                # Decode and parse the payload as JSON
-                payload_data = json.loads(msg.payload)
-                # Validate against the provided Pydantic model
-                validated_data = model(**payload_data)
-            except (json.JSONDecodeError, ValidationError) as e:
-                raise ValueError(f"Validation error occurred: {e}")
+                data = message_cls.model_validate_json(msg.payload)
+            except Exception as e:  # Handle validation errors gracefully
+                raise ValueError(f"Invalid payload for {message_cls.__name__}: {str(e)}")
 
-            # Add validated data into `kwargs` and also allow `parts` injection if expected
-            kwargs['data'] = validated_data
-
-            # Call the wrapped function with updated kwargs
-            return func(*args, **kwargs)
+            # Call the original function with the transformed arguments
+            return func(self, data, client, *args, **kwargs)
 
         return wrapper
 

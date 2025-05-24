@@ -17,10 +17,8 @@ class ServerController:
         self.logger = get_logger("Server:Controller")
 
     @router.topic(Topic.REGISTER.value)
-    # @schema(RegisterMessage)
-    def register(self, msg: MQTTMessage, client: Client) -> None:
-        data = RegisterMessage.model_validate_json(msg.payload)
-
+    @schema(RegisterMessage)
+    def register(self, data: RegisterMessage, client: Client) -> None:
         self.server_service.register(
             request_id=data.request_id,
             username=data.username,
@@ -29,10 +27,8 @@ class ServerController:
         )
 
     @router.topic(Topic.DISCONNECT.value)
-    # @schema(DisconnectMessage)
-    def disconnect(self, msg: MQTTMessage, client: Client) -> None:
-        data = DisconnectMessage.model_validate_json(msg.payload)
-
+    @schema(DisconnectMessage)
+    def disconnect(self, data: DisconnectMessage, client: Client) -> None:
         self.server_service.disconnect(
             request_id=data.request_id,
             username=data.username,
@@ -41,10 +37,8 @@ class ServerController:
         )
 
     @router.topic(Topic.SEND_FILE.value)
-    # @schema(SendFileMessage)
-    def handle_send_file(self, msg: MQTTMessage, client: Client) -> None:
-        data = SendFileMessage.model_validate_json(msg.payload)
-
+    @schema(SendFileMessage)
+    def handle_send_file(self, data: SendFileMessage, client: Client) -> None:
         self.server_service.send_file(
             request_id=data.request_id,
             from_user=data.from_user,
@@ -56,10 +50,8 @@ class ServerController:
         )
 
     @router.topic(Topic.SEND_MSG.value)
-    # @schema(SendTextMessage)
-    def send_message(self, msg: MQTTMessage, client: Client) -> None:
-        data = SendTextMessage.model_validate_json(msg.payload)
-
+    @schema(SendTextMessage)
+    def send_message(self, data: SendTextMessage, client: Client) -> None:
         self.server_service.send_message(
             request_id=data.request_id,
             from_user=data.from_user,
@@ -69,10 +61,8 @@ class ServerController:
         )
 
     @router.topic(Topic.LOOKUP.value)
-    # @schema(LookupMessage)
-    def lookup(self, msg: MQTTMessage, client: Client) -> None:
-        data = LookupMessage.model_validate_json(msg.payload)
-
+    @schema(LookupMessage)
+    def lookup(self, data: LookupMessage, client: Client) -> None:
         self.server_service.lookup(
             request_id=data.request_id,
             requester=data.requester,
