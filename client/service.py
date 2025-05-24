@@ -21,6 +21,13 @@ class ClientService:
 
         self.logger.info(f"Attempting register client {username} with address {address}")
 
+        # on register ack:
+        #
+        # logger.info(f"Connected to MQTT broker with result code {rc}")
+        # client.subscribe(f"{Topic.MSG.value}/{self.username}")
+        # client.subscribe(f"{Topic.LOOKUP.value}/{self.username}")
+
+
     def disconnect(self, username: str, address: str) -> None:
         self.client.publish(
             Topic.DISCONNECT.value,
@@ -28,6 +35,12 @@ class ClientService:
         )
 
         self.logger.info(f"Attempting disconnect for user {username}")
+
+        # on disconnect ack:
+        #
+        # self.client.loop_stop()
+        # self.client.disconnect()
+        # logger.info(f"Disconnected client {self.username}")
 
     def send_message(self, from_user: str, to_user: str, message: str) -> None:
         self.client.publish(
