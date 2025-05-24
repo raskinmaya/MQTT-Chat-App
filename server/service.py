@@ -64,6 +64,9 @@ class ClientService:
             )
 
         elif username in self.clients_online and self.clients_online[username] == address:
+            del self.clients_online[username]
+            logger.info("Disconnected user %s at %s", username, address)
+
             client.publish(
                 f"{Topic.DISCONNECT.value}/{address}",
                 ServerAck(
@@ -75,6 +78,8 @@ class ClientService:
             )
 
         else:
+            logger.info("Could not disconnect user %s", username)
+
             client.publish(
                 f"{Topic.DISCONNECT.value}/{address}",
                 ServerError(
