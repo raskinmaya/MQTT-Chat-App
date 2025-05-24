@@ -1,26 +1,45 @@
 from typing import Optional, Any
-
-from paho.mqtt.client import Client, MQTTMessage
-
+from paho.mqtt.client import Client
+from client.engine.core import on_message, on_connect
 from common.config import MQTT_BROKER, MQTT_PORT
 from common.logger import get_logger
 from common.types.client_messages import LookupMessage, SendTextMessage, RegisterMessage, SendFileMessage, \
     DisconnectMessage
+from common.types.server_messages import ServerError, ServerAck
 from common.types.topic import Topic
 
 
 class ClientService:
-    def __init__(self, mqtt_client: Client):
-        self.client = mqtt_client
+    def __init__(self):
+        self.client = Client()
+        self.username = ""
+        self.address = ""
+
+        self.client.on_connect = on_connect
+        self.client.on_message = on_message
         self.logger = get_logger("Client:Service")
 
     def register(self, username: str, address: str) -> None:
+        self.username = username
+        self.address = address
+
         self.client.publish(
             Topic.REGISTER.value,
             RegisterMessage(username=username, address=address).model_dump_json()
         )
 
         self.logger.info(f"Attempting register client {username} with address {address}")
+
+    def on_register_response(self, data: ServerAck | ServerError) -> None:
+        if isinstance(data, ServerError):
+            self.on_registration_failed(data.username, data.reason)
+
+        else:
+            self.on_registration_complete(data.username)
+
+    def on_registration_failed(self, username: str, reason: str) -> None:
+        self.logger.info(f"Registration failed for user {username}, reason: {reason}")
+        print(f"Registration failed for user {username}, reason: {reason}")
 
     def on_registration_complete(self, username: str) -> None:
         self.logger.info(f"Connecting client {username} to broker {MQTT_BROKER}:{MQTT_PORT}")

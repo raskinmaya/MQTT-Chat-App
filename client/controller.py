@@ -1,17 +1,25 @@
-from typing import Optional, Callable
+from typing import Optional
 
-from paho.mqtt.client import Client, MQTTMessage
+from paho.mqtt.client import MQTTMessage, Client
+
 from client.service import ClientService
 from common.logger import get_logger
+from common.types.server_messages import ServerError, ServerAck
+from common.types.topic import Topic
+from common.types.topic_router import TopicRouter
 
-
+router = TopicRouter()
 class ClientController:
-    def __init__(self, mqtt_client: Client):
-        self.client_service = ClientService(mqtt_client)
+    def __init__(self):
+        self.client_service = ClientService()
         self.logger = get_logger("Client:Controller")
 
     def register(self, username: str, address: str) -> None:
         self.client_service.register(username, address)
+
+    @router.topic(Topic.REGISTER.value)
+    def on_register_response(self, data: ServerAck | ServerError, parts: list[str], msg: MQTTMessage, client: Client) -> None:
+        self.client_service.on_register_response(data)
 
     def disconnect(self, username: str, address: str) -> None:
         self.client_service.disconnect(username, address)

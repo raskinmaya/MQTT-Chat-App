@@ -8,14 +8,11 @@ import threading
 import time
 
 from client.controller import ClientController
+from common.config import MQTT_BROKER, MQTT_PORT
 from common.types.topic import Topic
-
-BROKER = "localhost"
-PORT = 1883
 
 username = None
 client = mqtt.Client()
-registered = False
 client_controller = ClientController(client)
 
 def on_connect(client, userdata, flags, rc):
@@ -82,22 +79,6 @@ def try_register():
         client.unsubscribe(f"{Topic.REGISTER.value}/{address}")
 
 
-def send_message(receiver, message):
-    topic = f"send/msg/{username}/{receiver}"
-    payload = json.dumps({"text": message})
-    client.publish(topic, payload)
-
-
-def lookup_user(target):
-    payload = json.dumps({"target": target})
-    client.publish(f"lookup/{username}", payload)
-
-
-def disconnect():
-    client.publish(f"disconnect/{username}", "")
-    print("[SYSTEM] Disconnected.")
-
-
 def cli_loop():
     while True:
         try:
@@ -121,7 +102,7 @@ def cli_loop():
 def run():
     client.on_connect = on_connect
     client.on_message = on_message
-    client.connect(BROKER, PORT, 60)
+    client.connect(MQTT_BROKER, MQTT_PORT, 60)
 
     threading.Thread(target=client.loop_forever, daemon=True).start()
 

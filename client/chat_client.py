@@ -1,6 +1,5 @@
 from paho.mqtt.client import Client
 from client.controller import ClientController
-from common.config import MQTT_BROKER, MQTT_PORT
 from common.logger import get_logger
 from typing import Any, Optional
 
@@ -9,8 +8,7 @@ class ChatClient:
     def __init__(self, username: str, address: str):
         self.username = username
         self.address = address
-        self.client = Client(client_id=username)
-        self.controller = ClientController(self.client)
+        self.controller = ClientController()
         self.logger = get_logger("Chat:Client")
 
     def try_register(self, client: Client, userdata: Any, flags: dict, rc: int) -> None:

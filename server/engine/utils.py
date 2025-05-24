@@ -4,14 +4,6 @@ from paho.mqtt.client import MQTTMessage, Client
 from pydantic import BaseModel, ValidationError
 
 from common.logger import get_logger
-from server.engine.core import handlers
-
-def topic(topic_name: str) -> Callable:
-    def decorator(func: Callable[[list[str], MQTTMessage, Client], None]) -> Callable:
-        handlers[topic_name] = func
-        return func
-
-    return decorator
 
 def schema(model: Type[BaseModel]):
     def decorator(func: Callable[[BaseModel, list[str], Client], None]):
