@@ -1,44 +1,33 @@
-from typing import Callable, Optional
-from paho.mqtt.client import Client, MQTTMessage
-from common.logger import get_logger
-from common.types.client_messages import SendTextMessage, LookupMessage, RegisterMessage
-from common.types.topic import Topic
+from typing import Optional
 
-logger = get_logger("ClientController")
+from paho.mqtt.client import Client, MQTTMessage
+from client.service import ClientService
+from common.logger import get_logger
+
 
 class ClientController:
-    def __init__(self, mqtt_client: Client, username: str, address: str):
-        self.client = mqtt_client
-        self.username = username
-        self.address = address
+    def __init__(self, mqtt_client: Client):
+        self.client_service = ClientService(mqtt_client)
+        self.logger = get_logger("Client:Controller")
 
     def handle_incoming_message(self, client: Client, userdata, msg: MQTTMessage) -> None:
         topic_parts = msg.topic.split('/')
         try:
             raise NotImplementedError
         except Exception as e:
-            logger.error(f"Error handling incoming message on {msg.topic}: {e}")
+            self.logger.error(f"Error handling incoming message on {msg.topic}: {e}")
 
-    def register(self) -> None:
-        self.client.publish(
-            Topic.REGISTER.value,
-            RegisterMessage(username=self.username, address=self.address).model_dump_json()
-        )
+    def register(self, username: str, address: str) -> None:
+        self.client_service.register(username, address)
 
-        logger.info(f"Registered client {self.username} with address {self.address}")
+    def disconnect(self, username: str, address: str) -> None:
+        self.client_service.disconnect(username, address)
 
-    def send_message(self, to_user: str, message: str, timestamp: str) -> None:
-        self.client.publish(
-            Topic.MSG.value,
-            SendTextMessage(from_user=self.username, to_user=to_user, message=message, timestamp=timestamp).model_dump_json()
-        )
+    def send_message(self, from_user: str, to_user: str, message: str) -> None:
+        self.client_service.send_message(from_user, to_user, message)
 
-        logger.info(f"Sent message to {to_user}")
+    def send_file(self, from_user: str, to_user: str, filename: str, content_base64: str, message: Optional[str]) -> None:
+        self.client_service.send_file(from_user, to_user, content_base64, filename, message)
 
-    def lookup_user(self, target_user: str) -> None:
-        self.client.publish(
-            Topic.LOOKUP.value,
-            LookupMessage(requester=self.username, target=target_user).model_dump_json()
-        )
-
-        logger.info(f"Lookup requested for user {target_user}")
+    def lookup(self, requester: str, target_user: str) -> None:
+        self.client_service.lookup(requester, target_user)

@@ -17,7 +17,6 @@ class SendTextMessage(ClientMessage):
     from_user: str = Field(...)
     to_user: str = Field(...)
     message: str = Field(...)
-    timestamp: str
 
 class SendFileMessage(ClientMessage):
     from_user: str = Field(...)

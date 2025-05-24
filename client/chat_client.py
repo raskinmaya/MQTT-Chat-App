@@ -15,9 +15,6 @@ class ChatClient:
         self.client = Client(client_id=username)
         self.controller = ClientController(self.client, username, address)
 
-        self.client.on_connect = self.on_connect
-        self.client.on_message = self.controller.handle_incoming_message
-
     def on_connect(self, client: Client, userdata: Any, flags: dict, rc: int) -> None:
         logger.info(f"Connected to MQTT broker with result code {rc}")
         client.subscribe(f"{Topic.MSG.value}/{self.username}")
@@ -34,9 +31,8 @@ class ChatClient:
         self.client.disconnect()
         logger.info(f"Disconnected client {self.username}")
 
-    # Helper methods to interact with controller
     def send_message(self, to_user: str, message: str, timestamp: str) -> None:
         self.controller.send_message(to_user, message, timestamp)
 
-    def lookup_user(self, target_user: str) -> None:
-        self.controller.lookup_user(target_user)
+    def lookup(self, target_user: str) -> None:
+        self.controller.lookup(target_user)

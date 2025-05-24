@@ -1,17 +1,14 @@
-from typing import Any
 from paho.mqtt.client import Client
 from common.logger import get_logger
-import json
 
 from common.types.client_messages import SendFileMessage
 from common.types.server_messages import ServerError, ServerAck, LookupResponse, ChatMessage
 from common.types.topic import Topic
 
-logger = get_logger("Server:ClientService")
-
-class ClientService:
+class ServerService:
     def __init__(self):
         self.clients_online: dict[str, str] = {}
+        self.logger = get_logger("Server:Service")
 
     def register(self, username: str, address: str, client: Client) -> None:
         if not username or not address:
@@ -40,7 +37,7 @@ class ClientService:
 
         else:
             self.clients_online[username] = address
-            logger.info("Registered user %s at %s", username, address)
+            self.logger.info("Registered user %s at %s", username, address)
             client.publish(f"{Topic.REGISTER.value}/{address}",
                            ServerAck(
                                topic=f"{Topic.REGISTER.value}/{address}",
@@ -65,7 +62,7 @@ class ClientService:
 
         elif username in self.clients_online and self.clients_online[username] == address:
             del self.clients_online[username]
-            logger.info("Disconnected user %s at %s", username, address)
+            self.logger.info("Disconnected user %s at %s", username, address)
 
             client.publish(
                 f"{Topic.DISCONNECT.value}/{address}",
@@ -78,7 +75,7 @@ class ClientService:
             )
 
         else:
-            logger.info("Could not disconnect user %s", username)
+            self.logger.info("Could not disconnect user %s", username)
 
             client.publish(
                 f"{Topic.DISCONNECT.value}/{address}",
@@ -122,7 +119,7 @@ class ClientService:
                            ).model_dump_json()
             )
 
-            logger.info("Message from %s to %s sent", from_user, to_user)
+            self.logger.info("Message from %s to %s sent", from_user, to_user)
 
     def send_file(self, data: SendFileMessage, client: Client) -> None:
         if not data.to_user or not data.from_user or not data.content_base64:
@@ -162,7 +159,7 @@ class ClientService:
                            ).model_dump_json()
             )
 
-            logger.info("Message from %s to %s sent", data.from_user, data.to_user)
+            self.logger.info("Message from %s to %s sent", data.from_user, data.to_user)
 
     def lookup(self, requester: str, target: str, client: Client) -> None:
         address = self.clients_online.get(target, "")
@@ -185,4 +182,4 @@ class ClientService:
                            ).model_dump_json()
             )
 
-        logger.info("Lookup from %s to %s -> %s", requester, target, address)
+        self.logger.info("Lookup from %s to %s -> %s", requester, target, address)
