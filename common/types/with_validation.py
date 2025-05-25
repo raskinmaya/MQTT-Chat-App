@@ -25,17 +25,17 @@ def schema(message_cls: Type[BaseModel]):
     return decorator
 
 expected_response_types_for_topic = {
-                ServerMessageTopic.REGISTER_RESPONSE.value: (ServerError, ServerAck),
-                ServerMessageTopic.DISCONNECT_RESPONSE.value: (ServerError, ServerAck),
-                ServerMessageTopic.MSG.value: (ChatMessage,),
-                ServerMessageTopic.LOOKUP_RESPONSE.value: (ServerError, LookupResponse),
-                ServerMessageTopic.SEND_MSG_RESPONSE.value: (ServerError, ServerAck),
-                ServerMessageTopic.SEND_FILE_RESPONSE.value: (ServerError, ServerAck),
+                ServerMessageTopic.REGISTER_RESPONSE.value: {ServerError, ServerAck},
+                ServerMessageTopic.DISCONNECT_RESPONSE.value: {ServerError, ServerAck},
+                ServerMessageTopic.MSG.value: {ChatMessage},
+                ServerMessageTopic.LOOKUP_RESPONSE.value: {ServerError, LookupResponse},
+                ServerMessageTopic.SEND_MSG_RESPONSE.value: {ServerError, ServerAck},
+                ServerMessageTopic.SEND_FILE_RESPONSE.value: {ServerError, ServerAck},
 }
 
 def validate_message(
         payload: bytes,
-        *models: type[ServerMessage | ClientMessage]
+        models: set[ServerMessage | ClientMessage]
 ) -> ServerMessage:
     """Validate the payload against multiple models, return the first successful match."""
     for model in models:
