@@ -18,22 +18,9 @@ class ClientService:
         self.client = Client()
         setup_mq_client(self.client, self.on_message, self.on_connect)
         self.requests_track: dict[str, ServerMessage | Literal['Waiting for response']] = {}
-        self.start_monitoring_thread()
 
     def start_mq_client(self) -> None:
         self.client.loop_start()
-
-    def start_monitoring_thread(self):
-        monitoring_thread = Thread(target=self.monitor_requests_track, daemon=True)
-        monitoring_thread.start()
-
-    def monitor_requests_track(self):
-        while True:
-            time.sleep(1)
-            for request_id, status in list(self.requests_track.items()):
-                if status != "Waiting for response":
-                    self.logger.info(f"Request {request_id} has been updated: {status}")
-                    del self.requests_track[request_id]
 
     def on_connect(self, client: Client, userdata: Any, flags: dict[str, Any], rc: int) -> None:
         if rc == 0:
@@ -51,7 +38,7 @@ class ClientService:
             models = expected_response_types_for_topic.get(topic_parts[0])
 
             if models:
-                data = validate_message(msg.payload, *models)
+                data = validate_message(msg.payload, models)
                 self.requests_track[data.request_id] = data
 
                 handler = router.get(topic_parts[0])
