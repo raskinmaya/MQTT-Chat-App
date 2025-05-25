@@ -3,7 +3,7 @@ from threading import Thread
 from typing import Literal, Any, Optional
 from paho.mqtt.client import Client, MQTTMessage
 from pydantic import ValidationError
-from common.config import MQTT_BROKER, MQTT_PORT
+from common.config import MQTT_BROKER, MQTT_PORT, setup_mq_client
 from common.logger import get_logger
 from common.types.client_messages import RegisterMessage, DisconnectMessage, SendTextMessage, \
     SendFileMessage, LookupMessage
@@ -14,13 +14,11 @@ from common.types.with_validation import expected_response_types_for_topic, vali
 
 class ClientService:
     def __init__(self):
-        self.client = Client()
-        self.requests_track: dict[str, ServerMessage | Literal['Waiting for response']] = {}
         self.logger = get_logger("Client:Service")
+        self.client = Client()
+        setup_mq_client(self.client, self.on_message, self.on_connect)
+        self.requests_track: dict[str, ServerMessage | Literal['Waiting for response']] = {}
         self.start_monitoring_thread()
-        self.client.on_message = self.on_message
-        self.client.on_connect = self.on_connect
-        self.client.connect(MQTT_BROKER, MQTT_PORT)
 
     def start_monitoring_thread(self):
         monitoring_thread = Thread(target=self.monitor_requests_track, daemon=True)

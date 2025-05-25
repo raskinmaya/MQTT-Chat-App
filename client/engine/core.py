@@ -1,4 +1,3 @@
-from typing_extensions import Literal
 import time
 
 from client.controller import ClientController

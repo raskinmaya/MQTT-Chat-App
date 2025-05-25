@@ -15,7 +15,7 @@ def schema(message_cls: Type[BaseModel]):
 
     def decorator(func: Callable):
         @wraps(func)
-        def wrapper(self, msg: MQTTMessage, client, *args, **kwargs):
+        def wrapper(self, msg: MQTTMessage, *args, **kwargs):
             # Validate and parse the MQTTMessage payload using the provided schema
             try:
                 data = message_cls.model_validate_json(msg.payload)
@@ -23,7 +23,7 @@ def schema(message_cls: Type[BaseModel]):
                 raise ValueError(f"Invalid payload for {message_cls.__name__}: {str(e)}")
 
             # Call the original function with the transformed arguments
-            return func(self, data, client, *args, **kwargs)
+            return func(self, data, *args, **kwargs)
 
         return wrapper
 
