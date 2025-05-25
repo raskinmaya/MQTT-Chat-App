@@ -1,17 +1,14 @@
 from typing import Union, Literal, Optional
-
 from paho.mqtt.client import MQTTMessage, Client
-from pydantic import ValidationError
-
 from client.service import ClientService
 from common.logger import get_logger
-from common.types.server_messages import ServerMessage, ServerError, ServerAck
+from common.types.server_messages import ServerMessage
 from common.types.topic import Topic
 from common.types.topic_router import TopicRouter
 
-class ClientController:
-    router = TopicRouter()
+router = TopicRouter()
 
+class ClientController:
     def __init__(self):
         self.client_service = ClientService()
         self.logger = get_logger("Client:Controller")
@@ -19,6 +16,7 @@ class ClientController:
     def get_response(self, request_id: str) -> Union[ServerMessage, Literal["Waiting for response"], None]:
         return self.client_service.requests_track.get(request_id)
 
+    #region functions to interact from client gui
     def register(self, username: str, address: str) -> str:
         return self.client_service.register(
             username=username,
@@ -53,27 +51,30 @@ class ClientController:
             requester=requester,
             target=target
         )
+    #endregion
 
+    #region functions to handle messages received on mq
     @router.topic(Topic.REGISTER.value)
-    def register_response(self, msg: MQTTMessage, client: Client) -> None:
+    def handle_register_response(self, msg: MQTTMessage, client: Client) -> None:
         raise NotImplementedError
 
     @router.topic(Topic.DISCONNECT.value)
-    def disconnect_response(self, msg: MQTTMessage, client: Client) -> None:
+    def handle_disconnect_response(self, msg: MQTTMessage, client: Client) -> None:
         raise NotImplementedError
 
     @router.topic(Topic.SEND_MSG.value)
-    def send_text_message_response(self, msg: MQTTMessage, client: Client) -> None:
+    def handle_send_txt_msg_response(self, msg: MQTTMessage, client: Client) -> None:
         raise NotImplementedError
 
     @router.topic(Topic.SEND_FILE.value)
-    def send_file_response(self, msg: MQTTMessage, client: Client) -> None:
+    def handle_send_file_response(self, msg: MQTTMessage, client: Client) -> None:
         raise NotImplementedError
 
     @router.topic(Topic.LOOKUP.value)
-    def lookup_response(self, msg: MQTTMessage, client: Client) -> None:
+    def handle_lookup_response(self, msg: MQTTMessage, client: Client) -> None:
         raise NotImplementedError
 
     @router.topic(Topic.MSG.value)
     def handle_message_received(self, msg: MQTTMessage, client: Client) -> None:
         raise NotImplementedError
+    #endregion

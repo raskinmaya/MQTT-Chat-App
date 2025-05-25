@@ -1,16 +1,15 @@
 import time
 from threading import Thread
 from typing import Literal, Any, Optional
-
 from paho.mqtt.client import Client, MQTTMessage
 from pydantic import ValidationError
-
 from common.config import MQTT_BROKER, MQTT_PORT
 from common.logger import get_logger
 from common.types.client_messages import RegisterMessage, DisconnectMessage, SendTextMessage, \
     SendFileMessage, LookupMessage
-from common.types.server_messages import ServerMessage, ServerAck, ServerError, LookupResponse, ChatMessage
+from common.types.server_messages import ServerMessage
 from common.types.topic import Topic
+from common.types.with_validation import expected_response_types_for_topic, validate_message
 
 
 class ClientService:
@@ -24,7 +23,6 @@ class ClientService:
         self.client.connect(MQTT_BROKER, MQTT_PORT)
 
     def start_monitoring_thread(self):
-        """Start the thread responsible for monitoring the requests_track dictionary."""
         monitoring_thread = Thread(target=self.monitor_requests_track, daemon=True)
         monitoring_thread.start()
 
@@ -39,15 +37,6 @@ class ClientService:
                     # For example, remove processed requests
                     del self.requests_track[request_id]
 
-    def validate_message(self, payload: bytes, *models: type[ServerMessage]) -> ServerMessage:
-        """Validate the payload against multiple models, return the first successful match."""
-        for model in models:
-            try:
-                return model.model_validate_json(payload)
-            except ValidationError:
-                continue
-        raise ValidationError("Payload does not match any expected message type.")
-
     def on_connect(self, client: Client, userdata: Any, flags: dict[str, Any], rc: int) -> None:
         if rc == 0:
             self.logger.info("Connected to MQTT broker with result code %s", str(rc))
@@ -60,19 +49,10 @@ class ClientService:
     def on_message(self, client: Client, userdata: Any, msg: MQTTMessage) -> None:
         topic_parts = msg.topic.split('/')
         try:
-            topic_to_models = {
-                Topic.REGISTER.value: (ServerError, ServerAck),
-                Topic.DISCONNECT.value: (ServerError, ServerAck),
-                Topic.MSG.value: (ChatMessage,),
-                Topic.LOOKUP.value: (ServerError, LookupResponse),
-                Topic.SEND_MSG.value: (ServerError, ServerAck),
-                Topic.SEND_FILE.value: (ServerError, ServerAck),
-            }
-
-            models = topic_to_models.get(topic_parts[0])
+            models = expected_response_types_for_topic.get(topic_parts[0])
 
             if models:
-                data = self.validate_message(msg.payload, *models)
+                data = validate_message(msg.payload, *models)
                 self.requests_track[data.request_id] = data
 
             else:
@@ -127,7 +107,8 @@ class ClientService:
 
         return msg.request_id
 
-    def send_file(self, from_user: str, to_user: str, filename: str, content_base64: str, message: Optional[str] = "") -> str:
+    def send_file(self, from_user: str, to_user: str, filename: str,
+                  content_base64: str, message: Optional[str] = "") -> str:
         msg = SendFileMessage(
             to_user=to_user,
             from_user=from_user,
