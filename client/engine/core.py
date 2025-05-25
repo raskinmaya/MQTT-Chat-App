@@ -5,12 +5,8 @@ from common.types.server_messages import ServerError, ServerAck
 
 client_controller = ClientController()
 
-def run_client():
-    client_controller.start_mq_client()
+def handle_registration():
     registered = False
-    
-    print("Welcome to the Client Application!")
-    
     while not registered:
         username = input("Please enter your username: ")
         request_id = client_controller.register(username=username, address="localhost")
@@ -21,11 +17,16 @@ def run_client():
             res = client_controller.get_response(request_id)
 
         if isinstance(res, ServerError):
-            print(f"Error occurred: {res.message}, reason: {res.reason}")
+            print(f"Error occurred: {res.message}, reason: {res.reason}, restarting registration...")
 
         elif isinstance(res, ServerAck):
             print("Registration completed successfully!")
             registered = True
 
+def run_client():
+    client_controller.start_mq_client()
 
-    print("Menu will be printed here")
+    print("Welcome to the Client Application!")
+    handle_registration()
+
+    # TODO: Handle registered flow
