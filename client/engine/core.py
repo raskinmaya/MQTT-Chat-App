@@ -21,7 +21,7 @@ def run_client():
             res = client_controller.get_response(request_id)
 
         if isinstance(res, ServerError):
-            print("Error occurred: %s, reason: %s", res.message, res.reason)
+            print(f"Error occurred: {res.message}, reason: {res.reason}")
 
         elif isinstance(res, ServerAck):
             print("Registration completed successfully!")
