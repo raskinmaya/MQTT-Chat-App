@@ -6,7 +6,7 @@ from common.types.server_messages import ServerError, ServerAck
 client_controller = ClientController()
 
 def run_client():
-    client_controller.run()
+    client_controller.start_mq_client()
     registered = False
     
     print("Welcome to the Client Application!")

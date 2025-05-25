@@ -13,8 +13,8 @@ class ClientController:
         self.client_service = ClientService()
         self.logger = get_logger("Client:Controller")
 
-    def run(self):
-        self.client_service.run()
+    def start_mq_client(self):
+        self.client_service.start_mq_client()
 
     def get_response(self, request_id: str) -> Union[ServerMessage, Literal["Waiting for response"], None]:
         return self.client_service.requests_track.get(request_id)

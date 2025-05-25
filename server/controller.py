@@ -13,8 +13,8 @@ class ServerController:
         self.server_service = ServerService()
         self.logger = get_logger("Server:Controller")
 
-    def run(self) -> None:
-        self.server_service.run()
+    def start_mq_client(self) -> None:
+        self.server_service.start_mq_client()
 
     @router.topic(Topic.REGISTER.value)
     @schema(RegisterMessage)

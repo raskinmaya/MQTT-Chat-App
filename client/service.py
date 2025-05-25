@@ -20,7 +20,7 @@ class ClientService:
         self.requests_track: dict[str, ServerMessage | Literal['Waiting for response']] = {}
         self.start_monitoring_thread()
 
-    def run(self) -> None:
+    def start_mq_client(self) -> None:
         self.client.loop_start()
 
     def start_monitoring_thread(self):

@@ -6,4 +6,4 @@ logger = get_logger("Server:Core")
 
 def run_server():
     server_controller.logger.info("Server is starting...")
-    server_controller.run()
+    server_controller.start_mq_client()
