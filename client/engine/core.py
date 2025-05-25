@@ -17,7 +17,7 @@ def run_client():
         res = client_controller.get_response(request_id)
 
         while not res or res == 'Waiting for response':
-            time.sleep(1)
+            time.sleep(5)
             res = client_controller.get_response(request_id)
 
         if isinstance(res, ServerError):

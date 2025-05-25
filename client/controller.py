@@ -1,18 +1,17 @@
-from typing import Union, Literal
+from typing import Union, Literal, Optional
 
 from paho.mqtt.client import MQTTMessage, Client
+from pydantic import ValidationError
 
 from client.service import ClientService
 from common.logger import get_logger
-from common.types.client_messages import RegisterMessage
-from common.types.server_messages import ServerMessage
+from common.types.server_messages import ServerMessage, ServerError, ServerAck
 from common.types.topic import Topic
 from common.types.topic_router import TopicRouter
-from common.types.with_validation import schema
-
-router = TopicRouter()
 
 class ClientController:
+    router = TopicRouter()
+
     def __init__(self):
         self.client_service = ClientService()
         self.logger = get_logger("Client:Controller")
@@ -23,49 +22,58 @@ class ClientController:
     def register(self, username: str, address: str) -> str:
         return self.client_service.register(
             username=username,
-            address=address,
+            address=address
         )
 
-    # @router.topic(Topic.DISCONNECT.value)
-    # @schema(DisconnectMessage)
-    # def disconnect(self, data: DisconnectMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
-    #     self.server_service.disconnect(
-    #         request_id=data.request_id,
-    #         username=data.username,
-    #         address=data.address,
-    #         client=client
-    #     )
-    #
-    # @router.topic(Topic.SEND_FILE.value)
-    # @schema(SendFileMessage)
-    # def handle_send_file(self, data: SendFileMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
-    #     self.server_service.send_file(
-    #         request_id=data.request_id,
-    #         from_user=data.from_user,
-    #         to_user=data.to_user,
-    #         filename=data.filename,
-    #         content_base64=data.content_base64,
-    #         message=data.message,
-    #         client=client
-    #     )
-    #
-    # @router.topic(Topic.SEND_MSG.value)
-    # @schema(SendTextMessage)
-    # def send_message(self, data: SendTextMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
-    #     self.server_service.send_message(
-    #         request_id=data.request_id,
-    #         from_user=data.from_user,
-    #         to_user=data.to_user,
-    #         message=data.message,
-    #         client=client
-    #     )
-    #
-    # @router.topic(Topic.LOOKUP.value)
-    # @schema(LookupMessage)
-    # def lookup(self, data: LookupMessage, parts: list[str], msg: MQTTMessage, client: Client) -> None:
-    #     self.server_service.lookup(
-    #         request_id=data.request_id,
-    #         requester=data.requester,
-    #         target=data.target,
-    #         client=client
-    #     )
+    def disconnect(self, username: str, address: str) -> str:
+        return self.client_service.disconnect(
+            username=username,
+            address=address
+        )
+
+    def send_text_message(self, from_user: str, to_user: str, message: str) -> str:
+        return self.client_service.send_text_message(
+            from_user=from_user,
+            to_user=to_user,
+            message=message
+        )
+
+    def send_file(self, from_user: str, to_user: str, filename: str,
+                  content_base64: str, message: Optional[str] = "") -> str:
+        return self.client_service.send_file(
+            from_user=from_user,
+            to_user=to_user,
+            filename=filename,
+            content_base64=content_base64,
+            message=message
+        )
+
+    def lookup(self, requester: str, target: str) -> str:
+        return self.client_service.lookup(
+            requester=requester,
+            target=target
+        )
+
+    @router.topic(Topic.REGISTER.value)
+    def register_response(self, msg: MQTTMessage, client: Client) -> None:
+        raise NotImplementedError
+
+    @router.topic(Topic.DISCONNECT.value)
+    def disconnect_response(self, msg: MQTTMessage, client: Client) -> None:
+        raise NotImplementedError
+
+    @router.topic(Topic.SEND_MSG.value)
+    def send_text_message_response(self, msg: MQTTMessage, client: Client) -> None:
+        raise NotImplementedError
+
+    @router.topic(Topic.SEND_FILE.value)
+    def send_file_response(self, msg: MQTTMessage, client: Client) -> None:
+        raise NotImplementedError
+
+    @router.topic(Topic.LOOKUP.value)
+    def lookup_response(self, msg: MQTTMessage, client: Client) -> None:
+        raise NotImplementedError
+
+    @router.topic(Topic.MSG.value)
+    def handle_message_received(self, msg: MQTTMessage, client: Client) -> None:
+        raise NotImplementedError

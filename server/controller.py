@@ -38,7 +38,7 @@ class ServerController:
 
     @router.topic(Topic.SEND_FILE.value)
     @schema(SendFileMessage)
-    def handle_send_file(self, data: SendFileMessage, client: Client) -> None:
+    def send_file(self, data: SendFileMessage, client: Client) -> None:
         self.server_service.send_file(
             request_id=data.request_id,
             from_user=data.from_user,
