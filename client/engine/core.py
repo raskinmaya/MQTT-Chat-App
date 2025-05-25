@@ -20,13 +20,14 @@ def handle_registration():
             print(f"Error occurred: {res.message}, reason: {res.reason}, restarting registration...")
 
         elif isinstance(res, ServerAck):
-            print("Registration completed successfully!")
+            print("Registration completed successfully! Entering chat...")
             registered = True
+
+def enter_chat():
+    raise NotImplementedError
 
 def run_client():
     client_controller.start_mq_client()
-
     print("Welcome to the Client Application!")
     handle_registration()
-
-    # TODO: Handle registered flow
+    enter_chat()
