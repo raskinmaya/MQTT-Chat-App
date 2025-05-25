@@ -20,6 +20,9 @@ class ClientService:
         self.requests_track: dict[str, ServerMessage | Literal['Waiting for response']] = {}
         self.start_monitoring_thread()
 
+    def run(self) -> None:
+        self.client.loop_start()
+
     def start_monitoring_thread(self):
         monitoring_thread = Thread(target=self.monitor_requests_track, daemon=True)
         monitoring_thread.start()
@@ -39,9 +42,10 @@ class ClientService:
         else:
             self.logger.info(f"Bad connection, returned code: {rc}")
 
-        client.subscribe(f"{Topic.REGISTER.value}")
-
     def on_message(self, client: Client, userdata: Any, msg: MQTTMessage) -> None:
+        from client.controller import router
+        from client.engine.core import client_controller
+
         topic_parts = msg.topic.split('/')
         try:
             models = expected_response_types_for_topic.get(topic_parts[0])
@@ -50,8 +54,13 @@ class ClientService:
                 data = validate_message(msg.payload, *models)
                 self.requests_track[data.request_id] = data
 
-            else:
-                self.logger.warning("Unknown topic: %s", topic_parts[0])
+                handler = router.get(topic_parts[0])
+
+                if handler:
+                    handler(client_controller, msg)
+
+                else:
+                    self.logger.warning("Unhandled topic: %s", msg.topic)
 
         except ValidationError as e:
             self.logger.error("Request validation error for topic '%s': %s", topic_parts[0], str(e))

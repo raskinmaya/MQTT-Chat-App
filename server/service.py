@@ -14,6 +14,9 @@ class ServerService:
         setup_mq_client(self.client, self.on_message, self.on_connect)
         self.clients_online: dict[str, str] = {}
 
+    def run(self):
+        self.client.loop_forever()
+
     def on_connect(self, client: Client, userdata: Any, flags: dict[str, Any], rc: int) -> None:
         self.logger.info("Connected to MQTT broker with result code %s", str(rc))
 

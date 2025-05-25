@@ -13,6 +13,9 @@ class ServerController:
         self.server_service = ServerService()
         self.logger = get_logger("Server:Controller")
 
+    def run(self) -> None:
+        self.server_service.run()
+
     @router.topic(Topic.REGISTER.value)
     @schema(RegisterMessage)
     def register(self, data: RegisterMessage) -> None:

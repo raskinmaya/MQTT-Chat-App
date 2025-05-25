@@ -13,6 +13,9 @@ class ClientController:
         self.client_service = ClientService()
         self.logger = get_logger("Client:Controller")
 
+    def run(self):
+        self.client_service.run()
+
     def get_response(self, request_id: str) -> Union[ServerMessage, Literal["Waiting for response"], None]:
         return self.client_service.requests_track.get(request_id)
 
@@ -55,26 +58,26 @@ class ClientController:
 
     #region functions to handle messages received on mq
     @router.topic(Topic.REGISTER.value)
-    def handle_register_response(self, msg: MQTTMessage, client: Client) -> None:
+    def handle_register_response(self, msg: MQTTMessage) -> None:
         raise NotImplementedError
 
     @router.topic(Topic.DISCONNECT.value)
-    def handle_disconnect_response(self, msg: MQTTMessage, client: Client) -> None:
+    def handle_disconnect_response(self, msg: MQTTMessage) -> None:
         raise NotImplementedError
 
     @router.topic(Topic.SEND_MSG.value)
-    def handle_send_txt_msg_response(self, msg: MQTTMessage, client: Client) -> None:
+    def handle_send_txt_msg_response(self, msg: MQTTMessage) -> None:
         raise NotImplementedError
 
     @router.topic(Topic.SEND_FILE.value)
-    def handle_send_file_response(self, msg: MQTTMessage, client: Client) -> None:
+    def handle_send_file_response(self, msg: MQTTMessage) -> None:
         raise NotImplementedError
 
     @router.topic(Topic.LOOKUP.value)
-    def handle_lookup_response(self, msg: MQTTMessage, client: Client) -> None:
+    def handle_lookup_response(self, msg: MQTTMessage) -> None:
         raise NotImplementedError
 
     @router.topic(Topic.MSG.value)
-    def handle_message_received(self, msg: MQTTMessage, client: Client) -> None:
+    def handle_message_received(self, msg: MQTTMessage) -> None:
         raise NotImplementedError
     #endregion

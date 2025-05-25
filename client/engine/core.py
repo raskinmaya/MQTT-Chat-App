@@ -3,9 +3,11 @@ import time
 from client.controller import ClientController
 from common.types.server_messages import ServerError, ServerAck
 
+client_controller = ClientController()
 
 def run_client():
-    client_controller = ClientController()
+    client_controller.run()
+
     registered = False
     
     print("Welcome to the Client Application!")
