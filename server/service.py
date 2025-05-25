@@ -4,7 +4,7 @@ from paho.mqtt.client import Client, MQTTMessage
 from common.config import setup_mq_client
 from common.logger import get_logger
 from common.types.server_messages import ServerError, ServerAck, LookupResponse, ChatMessage
-from common.types.topic import Topic
+from common.types.topic import ClientMessageTopic, ServerMessageTopic
 
 
 class ServerService:
@@ -20,7 +20,7 @@ class ServerService:
     def on_connect(self, client: Client, userdata: Any, flags: dict[str, Any], rc: int) -> None:
         self.logger.info("Connected to MQTT broker with result code %s", str(rc))
 
-        for t in Topic:
+        for t in ClientMessageTopic:
             self.client.subscribe(f"{t.value}/#")
 
     def on_message(self, client: Client, userdata: Any, msg: MQTTMessage) -> None:
@@ -40,10 +40,10 @@ class ServerService:
     def register(self, request_id: str, username: str, address: str) -> None:
         if not username or not address:
             self.client.publish(
-                f"{Topic.REGISTER.value}/{address}",
+                f"{ServerMessageTopic.REGISTER_RESPONSE.value}/{address}",
                 ServerError(
                     request_id=request_id,
-                    topic=f"{Topic.REGISTER.value}/{address}",
+                    topic=f"{ClientMessageTopic.REGISTER.value}/{address}",
                     username=username,
                     address=address,
                     message="Registration could not be completed",
@@ -53,10 +53,10 @@ class ServerService:
 
         elif username in self.clients_online:
             self.client.publish(
-                f"{Topic.REGISTER.value}/{address}",
+                f"{ServerMessageTopic.REGISTER_RESPONSE.value}/{address}",
                 ServerError(
                     request_id=request_id,
-                    topic=f"{Topic.REGISTER.value}/{address}",
+                    topic=f"{ClientMessageTopic.REGISTER.value}/{address}",
                     username=username,
                     address=address,
                     message="Registration could not be completed",
@@ -67,23 +67,23 @@ class ServerService:
         else:
             self.clients_online[username] = address
             self.logger.info("Registered user %s at %s", username, address)
-            self.client.publish(f"{Topic.REGISTER.value}/{address}",
-                           ServerAck(
+            self.client.publish(f"{ServerMessageTopic.REGISTER_RESPONSE.value}/{address}",
+                                ServerAck(
                                request_id=request_id,
-                               topic=f"{Topic.REGISTER.value}/{address}",
+                               topic=f"{ClientMessageTopic.REGISTER.value}/{address}",
                                username=username,
                                address=address,
                                message=f"Registration completed for user {username}, address {address}"
                            ).model_dump_json()
-            )
+                                )
 
     def disconnect(self, request_id: str, username: str, address: str) -> None:
         if not username or not address:
             self.client.publish(
-                f"{Topic.DISCONNECT.value}/{address}",
+                f"{ServerMessageTopic.DISCONNECT_RESPONSE.value}/{address}",
                 ServerError(
                     request_id=request_id,
-                    topic=f"{Topic.DISCONNECT.value}/{address}",
+                    topic=f"{ClientMessageTopic.DISCONNECT.value}/{address}",
                     username=username,
                     address=address,
                     message="Disconnect failed",
@@ -96,10 +96,10 @@ class ServerService:
             self.logger.info("Disconnected user %s at %s", username, address)
 
             self.client.publish(
-                f"{Topic.DISCONNECT.value}/{address}",
+                f"{ServerMessageTopic.DISCONNECT_RESPONSE.value}/{address}",
                 ServerAck(
                     request_id=request_id,
-                    topic=f"{Topic.DISCONNECT.value}/{address}",
+                    topic=f"{ClientMessageTopic.DISCONNECT.value}/{address}",
                     username=username,
                     address=address,
                     message=f"User {username} disconnected",
@@ -110,10 +110,10 @@ class ServerService:
             self.logger.info("Could not disconnect user %s", username)
 
             self.client.publish(
-                f"{Topic.DISCONNECT.value}/{address}",
+                f"{ServerMessageTopic.DISCONNECT_RESPONSE.value}/{address}",
                 ServerError(
                     request_id=request_id,
-                    topic=f"{Topic.DISCONNECT.value}/{address}",
+                    topic=f"{ClientMessageTopic.DISCONNECT.value}/{address}",
                     username=username,
                     address=address,
                     message=f"User {username} disconnect failed",
@@ -123,47 +123,47 @@ class ServerService:
 
     def send_message(self, request_id: str, from_user: str, to_user: str, message: str) -> None:
         if not from_user or not to_user or not message:
-            self.client.publish(f"{Topic.SEND_MSG.value}/{from_user}",
-                           ServerError(
+            self.client.publish(f"{ServerMessageTopic.SEND_MSG_RESPONSE.value}/{from_user}",
+                                ServerError(
                                request_id=request_id,
-                               topic=f"{Topic.SEND_MSG.value}/{from_user}",
+                               topic=f"{ClientMessageTopic.SEND_MSG.value}/{from_user}",
                                username=from_user,
                                message="Message was not sent",
                                reason="from_user or to_user or message is empty"
                            ).model_dump_json()
-            )
+                                )
 
         elif to_user not in self.clients_online:
-            self.client.publish(f"{Topic.SEND_MSG.value}/{from_user}",
-                           ServerError(
+            self.client.publish(f"{ServerMessageTopic.SEND_MSG_RESPONSE.value}/{from_user}",
+                                ServerError(
                                request_id=request_id,
-                               topic=f"{Topic.SEND_MSG.value}/{from_user}",
+                               topic=f"{ClientMessageTopic.SEND_MSG.value}/{from_user}",
                                username=from_user,
                                message="Message was not sent",
                                reason=f"User {to_user} not found"
                            ).model_dump_json()
-            )
+                                )
 
         else:
-            self.client.publish(f"{Topic.MSG.value}/{to_user}", ChatMessage(message=message).model_dump_json())
-            self.client.publish(f"{Topic.SEND_MSG.value}/{from_user}",
-                           ServerAck(
+            self.client.publish(f"{ServerMessageTopic.MSG.value}/{to_user}", ChatMessage(message=message).model_dump_json())
+            self.client.publish(f"{ServerMessageTopic.SEND_MSG_RESPONSE.value}/{from_user}",
+                                ServerAck(
                                request_id=request_id,
-                               topic=f"{Topic.SEND_MSG.value}/{from_user}",
+                               topic=f"{ClientMessageTopic.SEND_MSG.value}/{from_user}",
                                username=from_user,
                                message=f"Message to user {to_user} was sent successfully",
                            ).model_dump_json()
-            )
+                                )
 
             self.logger.info("Message from %s to %s sent", from_user, to_user)
 
     def send_file(self, request_id: str, from_user: str, to_user: str, filename: str, content_base64: str, message: str) -> None:
         if not to_user or not from_user or not content_base64:
             self.client.publish(
-                f"{Topic.SEND_FILE.value}/{from_user}",
+                f"{ServerMessageTopic.SEND_FILE_RESPONSE.value}/{from_user}",
                 ServerError(
                     request_id=request_id,
-                    topic=f"{Topic.SEND_FILE.value}/{from_user}",
+                    topic=f"{ClientMessageTopic.SEND_FILE.value}/{from_user}",
                     username=from_user,
                     message="Message was not sent",
                     reason="from_user or to_user or content_base64 is empty"
@@ -171,34 +171,34 @@ class ServerService:
             )
 
         elif to_user not in self.clients_online:
-            self.client.publish(f"{Topic.SEND_FILE.value}/{from_user}",
-                           ServerError(
+            self.client.publish(f"{ServerMessageTopic.SEND_FILE_RESPONSE.value}/{from_user}",
+                                ServerError(
                                request_id=request_id,
-                               topic=f"{Topic.SEND_FILE.value}/{from_user}",
+                               topic=f"{ClientMessageTopic.SEND_FILE.value}/{from_user}",
                                username=from_user,
                                message="Message was not sent",
                                reason=f"User {to_user} not found"
                            ).model_dump_json()
-            )
+                                )
 
         else:
-            self.client.publish(f"{Topic.SEND_FILE.value}/{from_user}",
-                           ServerAck(
+            self.client.publish(f"{ServerMessageTopic.SEND_FILE_RESPONSE.value}/{from_user}",
+                                ServerAck(
                                request_id=request_id,
-                               topic=f"{Topic.SEND_FILE.value}/{from_user}",
+                               topic=f"{ClientMessageTopic.SEND_FILE.value}/{from_user}",
                                username=from_user,
                                message=f"File message to user {to_user} was sent successfully",
                            ).model_dump_json()
-            )
+                                )
 
-            self.client.publish(f"{Topic.MSG.value}/{to_user}",
-                           ChatMessage(
+            self.client.publish(f"{ServerMessageTopic.MSG.value}/{to_user}",
+                                ChatMessage(
                                request_id=str(uuid4()),
                                filename=filename,
                                message=message,
                                content_base64=content_base64
                            ).model_dump_json()
-            )
+                                )
 
             self.logger.info("Message from %s to %s sent", from_user, to_user)
 
@@ -206,23 +206,23 @@ class ServerService:
         address = self.clients_online.get(target, "")
 
         if not address:
-            self.client.publish(f"{Topic.LOOKUP.value}/{requester}",
-                           ServerError(
+            self.client.publish(f"{ServerMessageTopic.LOOKUP_RESPONSE.value}/{requester}",
+                                ServerError(
                                request_id=request_id,
-                               topic=f"{Topic.LOOKUP.value}/{requester}",
+                               topic=f"{ClientMessageTopic.LOOKUP.value}/{requester}",
                                username=requester,
                                message="Lookup failed",
                                reason=f"Address {target} not found"
                            ).model_dump_json()
-            )
+                                )
 
         else:
-            self.client.publish(f"{Topic.LOOKUP.value}/{requester}",
-                           LookupResponse(
+            self.client.publish(f"{ServerMessageTopic.LOOKUP_RESPONSE.value}/{requester}",
+                                LookupResponse(
                                request_id=request_id,
                                target=target,
                                address=address
                            ).model_dump_json()
-            )
+                                )
 
         self.logger.info("Lookup from %s to %s -> %s", requester, target, address)

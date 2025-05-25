@@ -3,7 +3,7 @@ from paho.mqtt.client import MQTTMessage, Client
 from client.service import ClientService
 from common.logger import get_logger
 from common.types.server_messages import ServerMessage
-from common.types.topic import Topic
+from common.types.topic import ClientMessageTopic, ServerMessageTopic
 from common.types.topic_router import TopicRouter
 
 router = TopicRouter()
@@ -57,27 +57,27 @@ class ClientController:
     #endregion
 
     #region functions to handle messages received on mq
-    @router.topic(Topic.REGISTER.value)
+    @router.topic(ServerMessageTopic.REGISTER_RESPONSE.value)
     def handle_register_response(self, msg: MQTTMessage) -> None:
         raise NotImplementedError
 
-    @router.topic(Topic.DISCONNECT.value)
+    @router.topic(ServerMessageTopic.DISCONNECT_RESPONSE.value)
     def handle_disconnect_response(self, msg: MQTTMessage) -> None:
         raise NotImplementedError
 
-    @router.topic(Topic.SEND_MSG.value)
+    @router.topic(ServerMessageTopic.SEND_MSG_RESPONSE.value)
     def handle_send_txt_msg_response(self, msg: MQTTMessage) -> None:
         raise NotImplementedError
 
-    @router.topic(Topic.SEND_FILE.value)
+    @router.topic(ServerMessageTopic.SEND_FILE_RESPONSE.value)
     def handle_send_file_response(self, msg: MQTTMessage) -> None:
         raise NotImplementedError
 
-    @router.topic(Topic.LOOKUP.value)
+    @router.topic(ServerMessageTopic.LOOKUP_RESPONSE.value)
     def handle_lookup_response(self, msg: MQTTMessage) -> None:
         raise NotImplementedError
 
-    @router.topic(Topic.MSG.value)
+    @router.topic(ServerMessageTopic.MSG.value)
     def handle_message_received(self, msg: MQTTMessage) -> None:
         raise NotImplementedError
     #endregion

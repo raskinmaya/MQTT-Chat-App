@@ -1,7 +1,7 @@
 from common.logger import get_logger
 from common.types.client_messages import RegisterMessage, SendTextMessage, LookupMessage, DisconnectMessage, \
     SendFileMessage
-from common.types.topic import Topic
+from common.types.topic import ClientMessageTopic
 from common.types.topic_router import TopicRouter
 from common.types.with_validation import schema
 from server.service import ServerService
@@ -16,7 +16,7 @@ class ServerController:
     def start_mq_client(self) -> None:
         self.server_service.start_mq_client()
 
-    @router.topic(Topic.REGISTER.value)
+    @router.topic(ClientMessageTopic.REGISTER.value)
     @schema(RegisterMessage)
     def register(self, data: RegisterMessage) -> None:
         self.server_service.register(
@@ -25,7 +25,7 @@ class ServerController:
             address=data.address,
         )
 
-    @router.topic(Topic.DISCONNECT.value)
+    @router.topic(ClientMessageTopic.DISCONNECT.value)
     @schema(DisconnectMessage)
     def disconnect(self, data: DisconnectMessage) -> None:
         self.server_service.disconnect(
@@ -34,7 +34,7 @@ class ServerController:
             address=data.address,
         )
 
-    @router.topic(Topic.SEND_FILE.value)
+    @router.topic(ClientMessageTopic.SEND_FILE.value)
     @schema(SendFileMessage)
     def send_file(self, data: SendFileMessage) -> None:
         self.server_service.send_file(
@@ -46,7 +46,7 @@ class ServerController:
             message=data.message,
         )
 
-    @router.topic(Topic.SEND_MSG.value)
+    @router.topic(ClientMessageTopic.SEND_MSG.value)
     @schema(SendTextMessage)
     def send_message(self, data: SendTextMessage) -> None:
         self.server_service.send_message(
@@ -56,7 +56,7 @@ class ServerController:
             message=data.message,
         )
 
-    @router.topic(Topic.LOOKUP.value)
+    @router.topic(ClientMessageTopic.LOOKUP.value)
     @schema(LookupMessage)
     def lookup(self, data: LookupMessage) -> None:
         self.server_service.lookup(

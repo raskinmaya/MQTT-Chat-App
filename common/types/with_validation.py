@@ -4,7 +4,7 @@ from typing import Type, Callable
 from pydantic import BaseModel, ValidationError
 from common.types.client_messages import ClientMessage
 from common.types.server_messages import ServerMessage, ServerError, ServerAck, ChatMessage, LookupResponse
-from common.types.topic import Topic
+from common.types.topic import ClientMessageTopic, ServerMessageTopic
 
 
 def schema(message_cls: Type[BaseModel]):
@@ -25,12 +25,12 @@ def schema(message_cls: Type[BaseModel]):
     return decorator
 
 expected_response_types_for_topic = {
-                Topic.REGISTER.value: (ServerError, ServerAck),
-                Topic.DISCONNECT.value: (ServerError, ServerAck),
-                Topic.MSG.value: (ChatMessage,),
-                Topic.LOOKUP.value: (ServerError, LookupResponse),
-                Topic.SEND_MSG.value: (ServerError, ServerAck),
-                Topic.SEND_FILE.value: (ServerError, ServerAck),
+                ServerMessageTopic.REGISTER_RESPONSE.value: (ServerError, ServerAck),
+                ServerMessageTopic.DISCONNECT_RESPONSE.value: (ServerError, ServerAck),
+                ServerMessageTopic.MSG.value: (ChatMessage,),
+                ServerMessageTopic.LOOKUP_RESPONSE.value: (ServerError, LookupResponse),
+                ServerMessageTopic.SEND_MSG_RESPONSE.value: (ServerError, ServerAck),
+                ServerMessageTopic.SEND_FILE_RESPONSE.value: (ServerError, ServerAck),
 }
 
 def validate_message(

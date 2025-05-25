@@ -1,9 +1,16 @@
 from enum import Enum
 
-class Topic(Enum):
+class ClientMessageTopic(Enum):
     REGISTER = "register"
     DISCONNECT = "disconnect"
-    MSG = "msg"
     LOOKUP = "lookup"
-    SEND_MSG = "send/msg"
-    SEND_FILE = "send/file"
+    SEND_MSG = "sendMsg"
+    SEND_FILE = "sendFile"
+
+class ServerMessageTopic(Enum):
+    MSG = "msg"
+    REGISTER_RESPONSE = "registerResponse"
+    DISCONNECT_RESPONSE = "disconnectResponse"
+    LOOKUP_RESPONSE = "lookupResponse"
+    SEND_MSG_RESPONSE = "sendMessageResponse"
+    SEND_FILE_RESPONSE = "sendFileResponse"

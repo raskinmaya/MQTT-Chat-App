@@ -8,7 +8,7 @@ from common.logger import get_logger
 from common.types.client_messages import RegisterMessage, DisconnectMessage, SendTextMessage, \
     SendFileMessage, LookupMessage
 from common.types.server_messages import ServerMessage
-from common.types.topic import Topic
+from common.types.topic import ClientMessageTopic, ServerMessageTopic
 from common.types.with_validation import expected_response_types_for_topic, validate_message
 
 
@@ -32,7 +32,7 @@ class ClientService:
             time.sleep(1)
             for request_id, status in list(self.requests_track.items()):
                 if status != "Waiting for response":
-                    self.logger.debug(f"Request {request_id} has been updated: {status}")
+                    self.logger.info(f"Request {request_id} has been updated: {status}")
                     del self.requests_track[request_id]
 
     def on_connect(self, client: Client, userdata: Any, flags: dict[str, Any], rc: int) -> None:
@@ -72,9 +72,9 @@ class ClientService:
         )
 
         self.requests_track[msg.request_id] = "Waiting for response"
-        self.client.subscribe(f"{Topic.REGISTER.value}/{address}")
+        self.client.subscribe(f"{ServerMessageTopic.REGISTER_RESPONSE.value}/{address}")
         self.client.publish(
-            Topic.REGISTER.value,
+            ClientMessageTopic.REGISTER.value,
             msg.model_dump_json()
         )
 
@@ -87,9 +87,9 @@ class ClientService:
         )
 
         self.requests_track[msg.request_id] = "Waiting for response"
-        self.client.subscribe(f"{Topic.DISCONNECT.value}/{address}")
+        self.client.subscribe(f"{ServerMessageTopic.DISCONNECT_RESPONSE.value}/{address}")
         self.client.publish(
-            Topic.DISCONNECT.value,
+            ClientMessageTopic.DISCONNECT.value,
             msg.model_dump_json()
         )
 
@@ -103,9 +103,9 @@ class ClientService:
         )
 
         self.requests_track[msg.request_id] = "Waiting for response"
-        self.client.subscribe(f"{Topic.SEND_MSG.value}/{from_user}")
+        self.client.subscribe(f"{ServerMessageTopic.SEND_MSG_RESPONSE.value}/{from_user}")
         self.client.publish(
-            Topic.SEND_MSG.value,
+            ClientMessageTopic.SEND_MSG.value,
             msg.model_dump_json()
         )
 
@@ -122,9 +122,9 @@ class ClientService:
         )
 
         self.requests_track[msg.request_id] = "Waiting for response"
-        self.client.subscribe(f"{Topic.SEND_FILE.value}/{from_user}")
+        self.client.subscribe(f"{ServerMessageTopic.SEND_FILE_RESPONSE.value}/{from_user}")
         self.client.publish(
-            Topic.SEND_FILE.value,
+            ClientMessageTopic.SEND_FILE.value,
             msg.model_dump_json()
         )
 
@@ -137,9 +137,9 @@ class ClientService:
         )
 
         self.requests_track[msg.request_id] = "Waiting for response"
-        self.client.subscribe(f"{Topic.LOOKUP.value}/{requester}")
+        self.client.subscribe(f"{ServerMessageTopic.LOOKUP_RESPONSE.value}/{requester}")
         self.client.publish(
-            Topic.LOOKUP.value,
+            ClientMessageTopic.LOOKUP.value,
             msg.model_dump_json()
         )
 
