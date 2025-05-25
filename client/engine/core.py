@@ -7,7 +7,6 @@ client_controller = ClientController()
 
 def run_client():
     client_controller.run()
-
     registered = False
     
     print("Welcome to the Client Application!")
