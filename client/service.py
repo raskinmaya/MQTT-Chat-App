@@ -26,12 +26,10 @@ class ClientService:
 
     def monitor_requests_track(self):
         while True:
-            time.sleep(1)  # Adjust the sleep duration as needed
+            time.sleep(1)
             for request_id, status in list(self.requests_track.items()):
                 if status != "Waiting for response":
                     self.logger.info(f"Request {request_id} has been updated: {status}")
-                    # Optionally, act on the update:
-                    # For example, remove processed requests
                     del self.requests_track[request_id]
 
     def on_connect(self, client: Client, userdata: Any, flags: dict[str, Any], rc: int) -> None:
