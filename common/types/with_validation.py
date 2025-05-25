@@ -8,11 +8,6 @@ from common.types.topic import Topic
 
 
 def schema(message_cls: Type[BaseModel]):
-    """
-    Decorator to transform 'msg.payload' into a validated model instance (data)
-    and pass it as an argument to the original function.
-    """
-
     def decorator(func: Callable):
         @wraps(func)
         def wrapper(self, msg: MQTTMessage, *args, **kwargs):

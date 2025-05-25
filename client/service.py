@@ -25,7 +25,6 @@ class ClientService:
         monitoring_thread.start()
 
     def monitor_requests_track(self):
-        """Continuously check requests_track for updates."""
         while True:
             time.sleep(1)  # Adjust the sleep duration as needed
             for request_id, status in list(self.requests_track.items()):

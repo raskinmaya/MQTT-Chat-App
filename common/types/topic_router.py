@@ -7,16 +7,6 @@ class TopicRouter:
         self.handlers: dict[str, Callable[[Union['ServerController','ClientController'], MQTTMessage, Client], None]] = {}
 
     def topic(self, topic: str):
-        """
-        Decorator for registering handler functions for specific MQTT topics.
-
-        Args:
-            topic (str): The MQTT topic pattern to register the handler for
-
-        Returns:
-            callable: The decorator function
-        """
-
         def decorator(func: Callable[[Union['ServerController','ClientController'], MQTTMessage, Client], None]):
             self.handlers[topic] = func
             return func
