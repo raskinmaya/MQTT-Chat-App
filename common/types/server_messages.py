@@ -1,10 +1,11 @@
 import time
 from typing import Optional
+from uuid import uuid4
 
 from pydantic import BaseModel
 
 class ServerMessage(BaseModel):
-    request_id: str
+    request_id: Optional[str] = str(uuid4())
     timestamp: Optional[float] = time.time()
 
 class LookupResponse(ServerMessage):
