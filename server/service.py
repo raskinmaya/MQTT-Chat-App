@@ -1,9 +1,7 @@
 from typing import Any
 from uuid import uuid4
-
 from paho.mqtt.client import Client, MQTTMessage
-
-from common.config import MQTT_BROKER, MQTT_PORT, setup_mq_client
+from common.config import setup_mq_client
 from common.logger import get_logger
 from common.types.server_messages import ServerError, ServerAck, LookupResponse, ChatMessage
 from common.types.topic import Topic

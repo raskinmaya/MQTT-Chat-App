@@ -3,7 +3,7 @@ from threading import Thread
 from typing import Literal, Any, Optional
 from paho.mqtt.client import Client, MQTTMessage
 from pydantic import ValidationError
-from common.config import MQTT_BROKER, MQTT_PORT, setup_mq_client
+from common.config import setup_mq_client
 from common.logger import get_logger
 from common.types.client_messages import RegisterMessage, DisconnectMessage, SendTextMessage, \
     SendFileMessage, LookupMessage
