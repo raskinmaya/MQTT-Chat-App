@@ -17,7 +17,3 @@ The goal behind this project was to build a messaging system using MQTT while fo
 ## What's Missing
 - 💔 The client is **non-functional** for now – there’s no graphical interface (ran out of time for this part).
 - Missing response handling on the client side as well (needs a GUI to interact with).
-
----
-
-While there’s still a lot left to do, the structure is in place to make it happen.
