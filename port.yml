@@ -1,0 +1,19 @@
+- identifier: some_identifier
+  title: Some Title
+  team: []
+  icon: DefaultBlueprint
+  blueprint: githubOrganization
+  properties:
+    login: string
+    id: 0
+    nodeId: string
+    url: string
+    reposUrl: string
+    eventsUrl: string
+    hooksUrl: string
+    issuesUrl: string
+    membersUrl: string
+    publicMembersUrl: string
+    avatarUrl: string
+    description: string
+  relations: {}
